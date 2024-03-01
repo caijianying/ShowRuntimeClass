@@ -1,0 +1,42 @@
+apply from :'config.gradle'
+//所有项目配置
+allprojects {
+    group 'com.xiaobaicai.plugin'
+    version '1.0'
+
+    apply plugin: 'idea'
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+}
+
+//所有子项目的通用配置
+subprojects {
+    //仓库地址
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    //公用依赖
+    dependencies {
+        // 全局依赖
+        implementation rootProject.ext.dependencies["hutool-all"]
+        implementation rootProject.ext.dependencies["byte-buddy"]
+        implementation rootProject.ext.dependencies["byte-buddy-agent"]
+        implementation rootProject.ext.dependencies["slf4j"]
+        annotationProcessor rootProject.ext.dependencies["lombok"]
+        compileOnly rootProject.ext.dependencies["lombok"]
+        testAnnotationProcessor rootProject.ext.dependencies["lombok"]
+        testCompileOnly rootProject.ext.dependencies["lombok"]
+        // 单测
+        testCompileOnly 'junit:junit:4.12'
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}

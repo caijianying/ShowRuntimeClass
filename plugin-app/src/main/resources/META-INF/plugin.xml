@@ -1,0 +1,39 @@
+<idea-plugin>
+    <id>com.caijy.plugin</id>
+    <vendor url="https://blog.caijy.top/" email="XiaoBaiCai5811@163.com"/>
+    <name>FindRuntimeClass</name>
+    <description><![CDATA[
+        This is a lightweight Idea plug-in that monitors the link calls of Junit and SpringBoot applications and counts the time spent on interface methods with zero intrusion. It helps developers see the timing of the call chain more visually when debugging code, and optimizes performance ahead of time.
+        ]]></description>
+    <vendor>小白菜</vendor>
+
+    <change-notes><![CDATA[
+        <h3>V20240301</h3>
+        <ul>
+            <li>fix some bugs</li>
+        </ul>
+
+        <h3>V20240301</h3>
+        <ul>
+            <li>修复了一些bug</li>
+        </ul>
+
+        ]]>
+    </change-notes>
+
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+
+    </extensions>
+
+    <actions>
+
+
+    </actions>
+
+</idea-plugin>
