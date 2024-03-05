@@ -1,9 +1,12 @@
 <idea-plugin>
-    <id>com.caijy.plugin</id>
+    <id>com.xiaobaicai.plugin</id>
     <vendor url="https://blog.caijy.top/" email="XiaoBaiCai5811@163.com"/>
     <name>FindRuntimeClass</name>
     <description><![CDATA[
-        This is a lightweight Idea plug-in that monitors the link calls of Junit and SpringBoot applications and counts the time spent on interface methods with zero intrusion. It helps developers see the timing of the call chain more visually when debugging code, and optimizes performance ahead of time.
+        The purpose of this plugin was to enable developers to view class files in the JVM memory while learning about the bytecode framework. If you find the plugin useful, please give it a good rating! Your approval is the driving force behind its updates.
+        <br/>
+        <br/>此插件开发出来的初衷是为了能让开发者在学习字节码框架时，能看到此时JVM内存中的class文件。
+        <br/>如果觉得插件好用，感谢给个好评！🙏🙏🙏 大家的认可是插件更新的动力！</a>
         ]]></description>
     <vendor>小白菜</vendor>
 
@@ -32,8 +35,12 @@
     </extensions>
 
     <actions>
+        <action class="com.xiaobaicai.plugin.action.ShowRuntimeClassAction" icon="./icons/show.svg"
+                description="ShowRuntimeClass" text="ShowRuntimeClass">
+            <!-- 添加到鼠标右键菜单中 -->
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
 
-
+        </action>
     </actions>
 
 </idea-plugin>
