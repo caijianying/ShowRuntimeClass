@@ -8,6 +8,8 @@ def getCurrentVersion() {
 
 ext {
     plugin = [
+            agentTargetJarModule : "plugin-app",
+            pluginTargetJarModule: "plugin-agent",
             version              : getCurrentVersion()
     ]
 

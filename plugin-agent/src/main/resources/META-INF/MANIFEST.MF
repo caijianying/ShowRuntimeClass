@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Agent-Class: com.xiaobaicai.plugin.agent.PluginAgent
+Premain-Class:  com.xiaobaicai.plugin.agent.PluginAgent
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true

@@ -8,9 +8,9 @@
  * accordance with the terms of the license agreement you entered
  * into with xiaobaicai
  */
-package com.xiaobaicai.plugin.utils;
+package com.xiaobaicai.plugin.app.utils;
 
-import com.xiaobaicai.plugin.constants.Constant;
+import com.xiaobaicai.plugin.app.constants.Constant;
 
 import java.util.Locale;
 import java.util.ResourceBundle;

@@ -1,9 +1,9 @@
-package com.xiaobaicai.plugin.utils;
+package com.xiaobaicai.plugin.app.utils;
 
 import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.xiaobaicai.plugin.constants.Constant;
+import com.xiaobaicai.plugin.app.constants.Constant;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -15,6 +15,11 @@ public class MessageUtil {
 
     public static void error(String message){
         Notification notification = new Notification("Print", LanguageUtil.getLocalMessages(Constant.MSG_ERROR), message, NotificationType.ERROR);
+        Notifications.Bus.notify(notification, null);
+    }
+
+    public static void warn(String message) {
+        Notification notification = new Notification("Print", LanguageUtil.getLocalMessages(Constant.MSG_ERROR), message, NotificationType.WARNING);
         Notifications.Bus.notify(notification, null);
     }
 

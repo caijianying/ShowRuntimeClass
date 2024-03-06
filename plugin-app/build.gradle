@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-
+    implementation project(":plugin-core")
 }
 
 

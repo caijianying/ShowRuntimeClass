@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group 'com.xiaobaicai.plugin'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+test {
+    useJUnitPlatform()
+}

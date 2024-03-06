@@ -1,3 +1,5 @@
 rootProject.name = 'ShowRuntimeClass'
 include 'plugin-app'
+include 'plugin-agent'
+include 'plugin-core'
 

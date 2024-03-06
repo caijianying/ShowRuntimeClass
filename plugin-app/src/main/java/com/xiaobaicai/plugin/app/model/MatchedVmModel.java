@@ -1,4 +1,4 @@
-package com.xiaobaicai.plugin.model;
+package com.xiaobaicai.plugin.app.model;
 
 import lombok.Data;
 

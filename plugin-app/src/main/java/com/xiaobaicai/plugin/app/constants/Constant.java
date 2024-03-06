@@ -1,4 +1,4 @@
-package com.xiaobaicai.plugin.constants;
+package com.xiaobaicai.plugin.app.constants;
 
 /**
  * @author caijy
@@ -8,6 +8,12 @@ package com.xiaobaicai.plugin.constants;
 public interface Constant {
 
     String PLUGIN_RESOURCE = "i18n.plugin";
+
+    String PLUGIN_ID="com.xiaobaicai.plugin";
+
+    String AGENT_PREFIX="plugin-agent";
+
+    String AGENT_SUFFIX="all.jar";
 
     /**
      * 消息
