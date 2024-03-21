@@ -22,7 +22,7 @@ public class CompletionProvider extends TextFieldWithAutoCompletionListProvider<
 
     private Map<String, MatchedVmModel> showNameVmMap = new HashMap<>();
 
-    protected CompletionProvider(Collection<MatchedVmModel> variants, Icon icon) {
+    public CompletionProvider(Collection<MatchedVmModel> variants, Icon icon) {
         super(variants);
         this.myIcon = icon;
     }

@@ -1,4 +1,4 @@
-apply from :'config.gradle'
+apply from: 'config.gradle'
 //所有项目配置
 allprojects {
     group 'com.xiaobaicai.plugin'
@@ -29,7 +29,9 @@ subprojects {
         testAnnotationProcessor rootProject.ext.dependencies["lombok"]
         testCompileOnly rootProject.ext.dependencies["lombok"]
         // 单测
-        testCompileOnly 'junit:junit:4.12'
+        testCompileOnly rootProject.ext.dependencies["junit"]
+        testImplementation rootProject.ext.dependencies["junit.jupiter.api"]
+        testImplementation rootProject.ext.dependencies["junit.jupiter.engine"]
     }
 }
 
@@ -39,4 +41,9 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
+}
+
+task packAllTwice() {
+    dependsOn(':plugin-agent:packAgent')
+    dependsOn(':plugin-app:assemble')
 }

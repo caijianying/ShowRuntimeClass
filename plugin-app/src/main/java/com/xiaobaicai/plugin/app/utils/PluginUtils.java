@@ -13,12 +13,11 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.xiaobaicai.plugin.app.constants.Constant;
-import com.xiaobaicai.plugin.core.boot.AgentPkgPath;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +29,8 @@ import java.util.Objects;
 public class PluginUtils {
 
     private static final IdeaPluginDescriptor IDEA_PLUGIN_DESCRIPTOR;
+
+    private static String agentJarPath;
 
     static {
         PluginId pluginId = PluginId.getId(Constant.PLUGIN_ID);
@@ -75,7 +76,10 @@ public class PluginUtils {
     }
 
     public static String getAgentCoreJarPath() {
-        return getJarPath(Constant.AGENT_PREFIX, Constant.AGENT_SUFFIX);
+        if (agentJarPath == null) {
+            agentJarPath = getJarPath(Constant.AGENT_PREFIX, Constant.AGENT_SUFFIX);
+        }
+        return agentJarPath;
     }
 
     /**
@@ -103,5 +107,12 @@ public class PluginUtils {
             }
         }
         return StrUtil.EMPTY;
+    }
+
+    public static String getDumpClassPath(String pid) {
+        File agentFile = new File(getAgentCoreJarPath());
+        String dumpClassPath = agentFile.getParent() + "/dump" + File.separator + pid;
+        System.out.println("dumpClassPath:" + dumpClassPath);
+        return dumpClassPath;
     }
 }

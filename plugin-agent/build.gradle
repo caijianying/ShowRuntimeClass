@@ -28,7 +28,7 @@ shadowJar {
 }
 
 // 移动agent包到plugin包下
-task packAgent(type: Copy, dependsOn: shadowJar) {
+task packAgent(type: Copy, dependsOn: [clean, shadowJar]) {
     sourceSets.main.resources.srcDirs.each {
         from "$buildDir/libs"
         into "$buildDir/../../$rootProject.ext.plugin.agentTargetJarModule/build/idea-sandbox/plugins/$rootProject.ext.plugin.agentTargetJarModule/lib"

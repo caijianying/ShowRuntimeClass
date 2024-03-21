@@ -13,8 +13,9 @@ import java.io.Serializable;
 public class AttachVmInfoDTO implements Serializable {
     private static final long serialVersionUID = -8880806212939427112L;
 
-    private String targetClassName;
+    private Integer port;
 
     private String pid;
 
+    private String targetClassName;
 }

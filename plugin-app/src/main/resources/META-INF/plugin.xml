@@ -20,7 +20,6 @@
         <ul>
             <li>修复了一些bug</li>
         </ul>
-
         ]]>
     </change-notes>
 
@@ -31,7 +30,12 @@
     <depends>com.intellij.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <toolWindow factoryClass="com.xiaobaicai.plugin.app.toolwindow.ShowRuntimeClassToolWindow"
+                    id="ShowRuntimeClass" anchor="right">
 
+        </toolWindow>
+        <!--数据持久化扩展点-->
+        <applicationService serviceImplementation="com.xiaobaicai.plugin.app.utils.ProjectCache"/>
     </extensions>
 
     <actions>
