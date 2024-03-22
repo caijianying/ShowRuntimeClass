@@ -11,19 +11,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.Tree;
-import com.xiaobaicai.plugin.app.utils.ProjectCache;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import com.xiaobaicai.plugin.core.utils.RemoteUtil;
 import lombok.SneakyThrows;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -44,11 +43,9 @@ public class FileTree extends Tree {
 
     private Integer port;
 
-    public FileTree(Project project, EditorEx editor, Consumer<String> treeChangeCallback, Integer port) {
+    public FileTree(Project project, EditorEx editor, Consumer<String> treeChangeCallback) {
 
         this.treeChangeCallback = treeChangeCallback;
-
-        this.port = port;
 
         setModel(new DefaultTreeModel(root));
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -61,7 +58,7 @@ public class FileTree extends Tree {
                     DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
                     if (selectedNode != null && selectedNode.getChildCount() == 0) {
                         String fullClassName = getSelectedFullClassName(selectedNode);
-                        RemoteService remoteService = RemoteUtil.getRemoteService(ProjectCache.getInstance().port);
+                        RemoteService remoteService = RemoteUtil.getRemoteService(getPort());
                         if (remoteService != null) {
                             String classFilePath = remoteService.retransFormClass(fullClassName);
                             if (classFilePath == null) {
@@ -152,5 +149,41 @@ public class FileTree extends Tree {
 
         treeChangeCallback.accept(className);
         return newNode;
+    }
+
+    public void setSelectedNode(String nodePath) {
+        String[] dirs = nodePath.split("/");
+        DefaultMutableTreeNode curNode = this.root;
+
+        boolean match = true;
+        for (String dir : dirs) {
+            boolean matchePath = false;
+            for (int i = 0; i < curNode.getChildCount(); i++) {
+                DefaultMutableTreeNode child = (DefaultMutableTreeNode) curNode.getChildAt(i);
+                if (child.getUserObject().equals(dir)) {
+                    matchePath = true;
+                    curNode = child;
+                    break;
+                }
+            }
+            if (!matchePath) {
+                match = false;
+                break;
+            }
+        }
+
+        if (match){
+            TreePath path = new TreePath(curNode.getPath());
+            this.setSelectionPath(path);
+            this.repaint();
+        }
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }

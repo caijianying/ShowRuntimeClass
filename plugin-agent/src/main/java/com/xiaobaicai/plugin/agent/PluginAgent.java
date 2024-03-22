@@ -2,7 +2,6 @@ package com.xiaobaicai.plugin.agent;
 
 import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.plugin.agent.utils.RuntimeMXBeanUtil;
-import com.xiaobaicai.plugin.core.utils.RemoteUtil;
 import com.xiaobaicai.plugin.service.RemoteAppService;
 import com.xiaobaicai.plugin.core.boot.AgentPkgPath;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;

@@ -3,7 +3,6 @@ package com.xiaobaicai.plugin.app.toolwindow;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -16,7 +15,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.GotItTooltip;
+import com.intellij.ui.IconWrapperWithToolTip;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.roots.ToolbarPanel;
 import com.sun.tools.attach.VirtualMachine;
@@ -25,9 +24,7 @@ import com.xiaobaicai.plugin.app.dialog.CompletionProvider;
 import com.xiaobaicai.plugin.app.model.MainClassInfoModel;
 import com.xiaobaicai.plugin.app.model.MatchedVmModel;
 import com.xiaobaicai.plugin.app.model.MatchedVmReturnModel;
-import com.xiaobaicai.plugin.app.model.SelectCallBackModel;
 import com.xiaobaicai.plugin.app.tree.FileTree;
-import com.xiaobaicai.plugin.app.utils.ProjectCache;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,7 +63,6 @@ public class ShowRuntimeClassPage {
     private JPanel jPanel = new JPanel(new BorderLayout());
     private CompletionProvider completionProvider;
     private FileTree fileTree;
-    private Integer port;
 
     public ShowRuntimeClassPage(Project project, Function<MatchedVmModel, MatchedVmReturnModel> callback) {
         this.project = project;
@@ -77,7 +73,7 @@ public class ShowRuntimeClassPage {
     }
 
     public JPanel createUIComponents() {
-        ApplicationManager.getApplication().invokeLater(()->{
+        ApplicationManager.getApplication().invokeLater(() -> {
             this.completionProvider.setItems(this.compare(project));
         });
         // 查找启动类输入框
@@ -98,8 +94,8 @@ public class ShowRuntimeClassPage {
                     ApplicationManager.getApplication().invokeLater(() -> {
                         MatchedVmReturnModel returnModel = callback.apply(vmModel);
                         Set<String> allAvailableClasses = returnModel.getClasses();
-                        ProjectCache.getInstance().port = returnModel.getPort();
                         if (allAvailableClasses != null) {
+                            fileTree.setPort(returnModel.getPort());
                             fileTree.reset();
                             for (String availableClass : allAvailableClasses) {
                                 fileTree.addNode(availableClass);
@@ -112,7 +108,7 @@ public class ShowRuntimeClassPage {
         mainClassAutoCompletion.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                ApplicationManager.getApplication().invokeLater(()->{
+                ApplicationManager.getApplication().invokeLater(() -> {
                     completionProvider.setItems(compare(project));
                 });
                 System.out.println("mainClassAutoCompletion.focusLost");
@@ -124,7 +120,11 @@ public class ShowRuntimeClassPage {
         JPanel topPane = new JPanel(new FlowLayout(FlowLayout.CENTER));
         List<String> showNames = Lists.newArrayList();
         topPane.add(new JLabel("Main Class"));
-        JLabel problemIcon = new JLabel(IconLoader.findIcon("./icons/show.svg"));
+
+        String tipMessage = "这是一个IconWrapperWithToolTip";
+        IconWrapperWithToolTip toolTip = new IconWrapperWithToolTip(IconLoader.findIcon("./icons/show.svg"), () -> tipMessage);
+        JLabel problemIcon = new JLabel(toolTip);
+        problemIcon.setToolTipText(tipMessage);
         topPane.add(problemIcon);
         topPane.add(mainClassAutoCompletion);
 
@@ -136,7 +136,7 @@ public class ShowRuntimeClassPage {
         JScrollPane jScrollPane = new JScrollPane(editor.getComponent());
         fileTree = new FileTree(project, editor, newShowName -> {
             showNames.add(newShowName);
-        }, port);
+        });
         JPanel treeJPanel = new JPanel(new BorderLayout());
 
 
@@ -152,24 +152,21 @@ public class ShowRuntimeClassPage {
             public void documentChanged(@NotNull DocumentEvent event) {
                 String showName = event.getDocument().getText();
                 System.out.println("classNamesCompletion.documentChanged: " + showName);
+                String nodePath = showName.replace(".", "/");
+                if (showNames.contains(nodePath)) {
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        fileTree.setSelectedNode(nodePath);
+                    });
+                }
             }
         });
         classNamesCompletion.setPreferredSize(new Dimension(250, 30));
-//        classNamesCompletion.setPlaceholder("please enter target class package like xx.xx.xx");
 
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         ToolbarPanel refreshPanel = new ToolbarPanel(classNamesCompletion, actionGroup);
         refreshPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         refreshPanel.add(new JLabel(IconLoader.findIcon("./icons/show.svg")));
         refreshPanel.add(classNamesCompletion);
-
-        new GotItTooltip("got.it.id", "刷新按钮", this.project).
-                // 为了方便调试，设置为100，该提示会出现 100 次
-                        withShowCount(100).
-                // 引导提示内容
-                        withHeader("输入文本，点击翻译按钮即可完成翻译").
-                // 引导提示位置设置在翻译按钮的正下方位置
-                        show(problemIcon, GotItTooltip.BOTTOM_MIDDLE);
 
         treeJPanel.add(refreshPanel, BorderLayout.NORTH);
         treeJPanel.add(fileTree, BorderLayout.CENTER);

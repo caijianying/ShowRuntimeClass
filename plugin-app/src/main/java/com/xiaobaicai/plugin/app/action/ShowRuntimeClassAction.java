@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 public class ShowRuntimeClassAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent actionEvent) {
-        PsiJavaFile psiJavaFile = (PsiJavaFile) actionEvent.getDataContext().getData("psi.File");
-        Module module = (Module) actionEvent.getDataContext().getData("module");
-        String name = module.getName();
-        Project project = actionEvent.getProject();
+//        PsiJavaFile psiJavaFile = (PsiJavaFile) actionEvent.getDataContext().getData("psi.File");
+//        Module module = (Module) actionEvent.getDataContext().getData("module");
+//        String name = module.getName();
+//        Project project = actionEvent.getProject();
     }
 }

@@ -39,7 +39,7 @@
     </extensions>
 
     <actions>
-        <action class="com.xiaobaicai.plugin.app.action.ShowRuntimeClassAction" icon="./icons/show.svg"
+        <action id="showRuntimeClassAction" class="com.xiaobaicai.plugin.app.action.ShowRuntimeClassAction" icon="./icons/show.svg"
                 description="ShowRuntimeClass" text="ShowRuntimeClass">
             <!-- 添加到鼠标右键菜单中 -->
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>

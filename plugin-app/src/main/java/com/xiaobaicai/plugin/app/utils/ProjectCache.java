@@ -7,6 +7,9 @@ import com.intellij.openapi.components.Storage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author caijy
  * @description
@@ -15,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 @State(name = "ShowRuntimeClass", storages = {@Storage(value = "show-runtime-class.xml")})
 public class ProjectCache implements PersistentStateComponent<ProjectCache> {
 
-    public Integer port;
+    public Map<String, Integer> mainClassPortMap = new HashMap<>();
 
     public static ProjectCache getInstance() {
         return ApplicationManager.getApplication().getService(ProjectCache.class);
@@ -28,6 +31,6 @@ public class ProjectCache implements PersistentStateComponent<ProjectCache> {
 
     @Override
     public void loadState(@NotNull ProjectCache projectCache) {
-        this.port = projectCache.port;
+        this.mainClassPortMap = projectCache.mainClassPortMap;
     }
 }
