@@ -22,7 +22,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,15 +62,11 @@ public class PluginUtils {
         VirtualMachine vm = null;
         try {
             vm = VirtualMachine.attach(infoDTO.getPid());
-            vm.loadAgent(path, JSONUtil.toJsonStr(infoDTO));
-        } catch (AttachNotSupportedException e) {
+            URI uri = new URI(path);
+            String encodedPath = uri.toASCIIString();
+            vm.loadAgent(encodedPath, JSONUtil.toJsonStr(infoDTO));
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (AgentInitializationException e) {
-            System.out.println("agent init error !");
-        } catch (AgentLoadException e) {
-
         } finally {
             if (vm != null) {
                 try {

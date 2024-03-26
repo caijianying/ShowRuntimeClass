@@ -93,10 +93,14 @@ public class ShowRuntimeClassPage {
                 if (matched) {
                     MatchedVmModel vmModel = completionProvider.getShowNameVmMap().get(showName);
                     MatchedVmReturnModel returnModel = callback.apply(vmModel);
+                    if (returnModel == null) {
+                        System.err.println("出现异常！");
+                        return;
+                    }
                     Set<String> allAvailableClasses = returnModel.getClasses();
                     if (allAvailableClasses != null) {
                         fileTree.setPort(returnModel.getPort());
-                        ApplicationManager.getApplication().invokeLater(()->{
+                        ApplicationManager.getApplication().invokeLater(() -> {
                             fileTree.reset();
                             for (String availableClass : allAvailableClasses) {
                                 fileTree.addNode(availableClass);

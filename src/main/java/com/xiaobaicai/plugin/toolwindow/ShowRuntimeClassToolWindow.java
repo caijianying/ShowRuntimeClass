@@ -1,4 +1,5 @@
 package com.xiaobaicai.plugin.toolwindow;
+
 import cn.hutool.core.net.NetUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -47,14 +48,19 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
             AttachVmInfoDTO vmInfoDTO = new AttachVmInfoDTO();
             vmInfoDTO.setPid(vmModel.getPid());
             vmInfoDTO.setPort(NetUtil.getUsableLocalPort());
-            PluginUtils.attach(vmInfoDTO);
-
-            RemoteService remoteService = RemoteUtil.getRemoteService(vmInfoDTO.getPort());
             Set<String> availableClasses = null;
             try {
+                PluginUtils.attach(vmInfoDTO);
+                RemoteService remoteService = RemoteUtil.getRemoteService(vmInfoDTO.getPort());
+                if (remoteService == null) {
+                    System.out.println("远程服务出现问题！");
+                    return null;
+                }
                 String classStr = remoteService.getAllAvailableClasses();
                 availableClasses = Sets.newHashSet(classStr.split(","));
             } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
