@@ -22,8 +22,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,29 +54,36 @@ public class PluginUtils {
         return null;
     }
 
+
     public static void attach(AttachVmInfoDTO infoDTO) {
         String path;
         try {
             path = getAgentCoreJarPath();
+//            path = "/Users/jianyingcai/Library/Application Support/JetBrains/IntelliJIdea2021.1/plugins/plugin-agent-20240328-all.jar";
+//            path = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/build/idea-sandbox/plugins/ShowRuntimeClass/lib/plugin-agent-20240328-all.jar";
             MessageUtil.info("agent jar: " + path);
         } catch (Throwable ex) {
             System.out.println("cannot find agent jar !");
             return;
         }
+        saveInfoLog("getPathOK");
         VirtualMachine vm = null;
         try {
             vm = VirtualMachine.attach(infoDTO.getPid());
-            URI uri = new URI(path);
-            String encodedPath = uri.toASCIIString();
-            vm.loadAgent(encodedPath, JSONUtil.toJsonStr(infoDTO));
-        } catch (Exception e) {
-            e.printStackTrace();
+            saveInfoLog("VirtualMachine.attach ok");
+            vm.loadAgent(path, JSONUtil.toJsonStr(infoDTO));
+            saveInfoLog("VirtualMachine.loadAgent ok");
+        } catch (AgentLoadException e) {
+            System.out.println("无影响");
+        } catch (Throwable e) {
+            saveErrorLog(exceptionToString(e));
+            MessageUtil.infoOpenToolWindow("loadAgent出现异常! ");
         } finally {
             if (vm != null) {
                 try {
                     vm.detach();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    saveErrorLog(exceptionToString(e));
                 }
             }
         }
@@ -103,53 +114,38 @@ public class PluginUtils {
             String name = file.getName();
             if (name.startsWith(startWith) && name.endsWith(suffix)) {
                 String pathStr = FileUtil.getCanonicalPath(file);
-                if (StrUtil.contains(pathStr, StrUtil.SPACE)) {
-                    return StrUtil.builder().append(quotes).append(pathStr).append(quotes).toString();
-                }
+//                if (StrUtil.contains(pathStr, StrUtil.SPACE)) {
+//                    return StrUtil.builder().append(quotes).append(pathStr).append(quotes).toString();
+//                }
                 return pathStr;
             }
         }
         return StrUtil.EMPTY;
     }
 
-    public static String getDumpClassPath(String pid) {
-        File agentFile = new File(getAgentCoreJarPath());
-        String dumpClassPath = agentFile.getParent() + "/dump" + File.separator + pid;
-        System.out.println("dumpClassPath:" + dumpClassPath);
-        return dumpClassPath;
+    public static String exceptionToString(Throwable throwable) {
+        // 使用StringWriter捕获异常信息
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        throwable.printStackTrace(printWriter);
+        printWriter.flush();
+
+        // 返回捕获的异常信息字符串
+        return stringWriter.toString();
     }
 
-    public static Component replaceEditorWithLoading(EditorEx editor) {
-        // 获取编辑器所在的 JScrollPane
-        Component component = editor.getScrollPane();
-        while (!(component instanceof JBScrollPane) && component != null) {
-            component = component.getParent();
-        }
-        if (component instanceof JBScrollPane) {
-            JLabel loadingLabel = new JLabel("Loading...");
-            loadingLabel.setVisible(true);
-            // 设置loading文本的颜色
-            loadingLabel.setForeground(Color.BLUE);
-            // 设置loading图标
-            loadingLabel.setIcon(new ImageIcon("./icons/loading.gif"));
-            JBScrollPane scrollPane = (JBScrollPane) component;
-            // 移除编辑器
-            scrollPane.setViewportView(null);
-            // 将 JProgressBar 添加到 JScrollPane 中
-            scrollPane.setViewportView(loadingLabel);
-            return loadingLabel;
-        } else {
-            Messages.showMessageDialog("Cannot find JBScrollPane containing Editor", "Error", null);
-        }
-        return null;
+    public static void saveInfoLog(String message) {
+        String infoLogPath = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/info.log";
+        FileUtil.appendString(message + "\n", infoLogPath, StandardCharsets.UTF_8);
     }
 
-    public static Component replaceLoadingWithEditor(EditorEx editor) {
-        JScrollPane scrollPane = editor.getScrollPane();
-        // 移除标签
-        scrollPane.setViewportView(null);
-        // 将编辑器添加到 JScrollPane 中
-        scrollPane.setViewportView(editor.getContentComponent());
-        return scrollPane;
+    public static void saveErrorLog(Throwable ex) {
+        String message = exceptionToString(ex);
+        saveErrorLog(message);
+    }
+
+    public static void saveErrorLog(String message) {
+        String errorLogPath = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/error.log";
+        FileUtil.appendString(message + "\n", errorLogPath, StandardCharsets.UTF_8);
     }
 }

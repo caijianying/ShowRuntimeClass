@@ -7,6 +7,7 @@ import com.xiaobaicai.plugin.core.boot.AgentPkgPath;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * @description
  * @date 2024/3/6 星期三 3:04 下午
  */
+@Slf4j
 public class PluginAgent {
 
     public static void premain(String agentArgs, Instrumentation inst) {
@@ -34,6 +36,7 @@ public class PluginAgent {
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
+        log.info("PluginAgent....agentmain,agentArgs: " + agentArgs);
         System.out.println("PluginAgent....agentmain,agentArgs: " + agentArgs);
         AttachVmInfoDTO infoDTO = JSONUtil.toBean(agentArgs, AttachVmInfoDTO.class);
         String targetClassName = infoDTO.getTargetClassName();

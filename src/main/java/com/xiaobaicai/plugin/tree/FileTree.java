@@ -8,28 +8,27 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import com.xiaobaicai.plugin.core.utils.RemoteUtil;
+import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
+import com.xiaobaicai.plugin.utils.MessageUtil;
 import com.xiaobaicai.plugin.utils.PluginUtils;
 import lombok.SneakyThrows;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.*;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 /**
@@ -47,19 +46,31 @@ public class FileTree extends Tree {
 
     private Consumer<String> treeChangeCallback;
 
-    private JBScrollPane scrollPane;
-
     private Integer port;
 
     private EditorEx editor;
+    // 进度条
+    private JProgressBar progressBar;
+    // 显示进度条的对话框
+    private JDialog progressDialog;
 
-    public static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 5, 60L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>());
-
-    public FileTree(Project project, EditorEx editor, JBScrollPane scrollPane, Consumer<String> treeChangeCallback) {
-        this.scrollPane = scrollPane;
+    public FileTree(Project project, EditorEx editor, Consumer<String> treeChangeCallback) {
         this.editor = editor;
         this.treeChangeCallback = treeChangeCallback;
+
+        // 创建进度条
+        progressBar = new JProgressBar();
+        progressBar.setString("Loading...");
+        progressBar.setStringPainted(true);
+
+        // 创建对话框
+        progressDialog = new JDialog((Frame) null, "Loading", true);
+        // 不显示边框
+        progressDialog.setUndecorated(true);
+        progressDialog.add(progressBar);
+        progressDialog.pack();
+        // 将对话框显示在屏幕中央
+        progressDialog.setLocationRelativeTo(editor.getComponent());
 
         setModel(new DefaultTreeModel(root));
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -69,22 +80,37 @@ public class FileTree extends Tree {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
-                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
-                    if (selectedNode != null && selectedNode.getChildCount() == 0) {
-                        String fullClassName = getSelectedFullClassName(selectedNode);
-                        RemoteService remoteService = RemoteUtil.getRemoteService(getPort());
-                        if (remoteService != null) {
-                            Component loadingComponent = PluginUtils.replaceEditorWithLoading(editor);
-                            String classFilePath = remoteService.retransFormClass(fullClassName);
-                            if (classFilePath == null) {
-                                System.out.println("classFilePath is null!");
-                                return;
+                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                        try {
+                            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+                            if (selectedNode != null && selectedNode.getChildCount() == 0) {
+                                String fullClassName = getSelectedFullClassName(selectedNode);
+                                RemoteService remoteService = RemoteUtil.getRemoteService(getPort());
+                                if (remoteService != null) {
+                                    String classFilePath = remoteService.retransFormClass(fullClassName);
+                                    if (classFilePath == null) {
+                                        System.out.println("classFilePath is null!");
+                                        return;
+                                    }
+                                    updateFileContent(classFilePath, project, null);
+                                    nodePathMap.put(fullClassName, classFilePath);
+                                }
                             }
-                            updateFileContent(classFilePath, project, loadingComponent);
-                            nodePathMap.put(fullClassName, classFilePath);
+                        } catch (Throwable ex) {
+                            PluginUtils.saveErrorLog(ex);
                         }
+                        // 在 UI 线程中隐藏进度条
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            progressBar.setIndeterminate(false);
+                            progressDialog.setVisible(false);
+                        });
+                    });
 
-                    }
+                    // 显示进度条
+                    progressBar.setIndeterminate(true);
+                    // 巨坑，这是一个阻塞操作！
+                    // 显示进度条后，会导致后面的代码无法执行。所以预先用多线程执行隐藏进度条的代码
+                    progressDialog.setVisible(true);
                 }
             }
         });
@@ -110,7 +136,7 @@ public class FileTree extends Tree {
         // 在这里更新右侧文本区域的内容，根据文件名加载文件内容等操作
         System.out.println("Selected File: " + filePath);
         // 启动一个新线程来模拟加载文件内容的耗时操作
-        threadPoolExecutor.execute(() -> {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
             VirtualFile virtualFile = null;
             while (true) {
                 virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
@@ -121,7 +147,6 @@ public class FileTree extends Tree {
             // 文件加载完成后，在 UI 线程中更新内容和进度条状态
             VirtualFile finalVirtualFile = virtualFile;
             ApplicationManager.getApplication().invokeLater(() -> {
-                loadingComponent.setVisible(false);
                 // 设置编辑器文本内容
                 ApplicationManager.getApplication().runWriteAction(() -> {
                     Document document = FileDocumentManager.getInstance().getDocument(finalVirtualFile);
@@ -137,9 +162,7 @@ public class FileTree extends Tree {
                         editor.getDocument().setText(document.getText());
                     }
                 });
-                PluginUtils.replaceLoadingWithEditor(editor);
             });
-
         });
     }
 
@@ -153,7 +176,7 @@ public class FileTree extends Tree {
         this.repaint();
     }
 
-    public void reset() {
+    private void reset() {
         this.root.removeAllChildren();
         // 通知模型发生节点变化
         ((DefaultTreeModel) this.getModel()).reload(this.root);
@@ -163,6 +186,13 @@ public class FileTree extends Tree {
             editor.setViewer(true);
             editor.getDocument().setText("");
         });
+        setIconRender();
+    }
+
+    private void setIconRender(){
+        DefaultTreeCellRenderer cellRenderer = new DefaultTreeCellRenderer();
+        cellRenderer.setLeafIcon(IconLoader.findIcon("./icons/classIcon.svg"));
+        setCellRenderer(cellRenderer);
     }
 
     /**
@@ -212,11 +242,41 @@ public class FileTree extends Tree {
         }
     }
 
-    public Integer getPort() {
+    private Integer getPort() {
         return port;
     }
 
-    public void setPort(Integer port) {
+    private void setPort(Integer port) {
         this.port = port;
+    }
+
+    public void handleFutureVmProcessChoosed(Future<MatchedVmReturnModel> modelFuture) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            MatchedVmReturnModel returnModel = null;
+            try {
+                returnModel = modelFuture.get();
+            } catch (InterruptedException e) {
+                PluginUtils.saveErrorLog(e);
+            } catch (ExecutionException e) {
+                PluginUtils.saveErrorLog(e);
+            } catch (Throwable ex) {
+                PluginUtils.saveErrorLog(ex);
+            }
+            if (returnModel == null) {
+                MessageUtil.infoOpenToolWindow("出现异常!");
+                return;
+            }
+            Set<String> allAvailableClasses = returnModel.getClasses();
+            if (allAvailableClasses != null) {
+                this.setPort(returnModel.getPort());
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    this.reset();
+
+                    for (String availableClass : allAvailableClasses) {
+                        this.addNode(availableClass);
+                    }
+                });
+            }
+        });
     }
 }

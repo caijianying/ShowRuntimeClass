@@ -23,6 +23,10 @@ dependencies {
     compileOnly rootProject.ext.dependencies["lombok"]
     testAnnotationProcessor rootProject.ext.dependencies["lombok"]
     testCompileOnly rootProject.ext.dependencies["lombok"]
+    // 单测
+    testCompileOnly rootProject.ext.dependencies["junit"]
+    testImplementation rootProject.ext.dependencies["junit.jupiter.api"]
+    testImplementation rootProject.ext.dependencies["junit.jupiter.engine"]
 }
 
 

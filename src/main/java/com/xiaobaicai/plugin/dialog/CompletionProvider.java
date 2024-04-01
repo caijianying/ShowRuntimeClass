@@ -4,9 +4,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.ui.TextFieldWithAutoCompletionListProvider;
 import com.xiaobaicai.plugin.model.MatchedVmModel;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,18 +15,10 @@ import java.util.Map;
  */
 public class CompletionProvider extends TextFieldWithAutoCompletionListProvider<MatchedVmModel> implements DumbAware {
 
-    private final Icon myIcon;
-
     private Map<String, MatchedVmModel> showNameVmMap = new HashMap<>();
 
-    public CompletionProvider(Collection<MatchedVmModel> variants, Icon icon) {
+    public CompletionProvider(Collection<MatchedVmModel> variants) {
         super(variants);
-        this.myIcon = icon;
-    }
-
-    @Override
-    protected @Nullable Icon getIcon(@NotNull MatchedVmModel item) {
-        return this.myIcon;
     }
 
     public Map<String, MatchedVmModel> getShowNameVmMap() {
