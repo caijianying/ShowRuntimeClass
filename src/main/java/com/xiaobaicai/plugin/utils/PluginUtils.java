@@ -5,29 +5,20 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiJavaFile;
-import com.intellij.ui.components.JBScrollPane;
-import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.xiaobaicai.plugin.constants.Constant;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,16 +33,11 @@ public class PluginUtils {
 
     private static String agentJarPath;
 
+    private static String logDir;
+
     static {
         PluginId pluginId = PluginId.getId(Constant.PLUGIN_ID);
         IDEA_PLUGIN_DESCRIPTOR = PluginManagerCore.getPlugin(pluginId);
-    }
-
-    /**
-     * @return mainClass path
-     **/
-    public static String findMainClass(PsiJavaFile currentJavaFile, Module currentModule) {
-        return null;
     }
 
 
@@ -59,11 +45,8 @@ public class PluginUtils {
         String path;
         try {
             path = getAgentCoreJarPath();
-//            path = "/Users/jianyingcai/Library/Application Support/JetBrains/IntelliJIdea2021.1/plugins/plugin-agent-20240328-all.jar";
-//            path = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/build/idea-sandbox/plugins/ShowRuntimeClass/lib/plugin-agent-20240328-all.jar";
-            MessageUtil.info("agent jar: " + path);
         } catch (Throwable ex) {
-            System.out.println("cannot find agent jar !");
+            handleError(ex);
             return;
         }
         saveInfoLog("getPathOK");
@@ -76,14 +59,15 @@ public class PluginUtils {
         } catch (AgentLoadException e) {
             System.out.println("无影响");
         } catch (Throwable e) {
-            saveErrorLog(exceptionToString(e));
-            MessageUtil.infoOpenToolWindow("loadAgent出现异常! ");
+            String logPath = saveErrorLog(exceptionToString(e));
+            MessageUtil.infoOpenLogFile("插件错误", logPath);
         } finally {
             if (vm != null) {
                 try {
                     vm.detach();
                 } catch (IOException e) {
-                    saveErrorLog(exceptionToString(e));
+                    String logPath = saveErrorLog(exceptionToString(e));
+                    MessageUtil.infoOpenLogFile("插件错误", logPath);
                 }
             }
         }
@@ -103,23 +87,18 @@ public class PluginUtils {
      * @return String
      */
     private static String getJarPath(String startWith, String suffix) {
-        final String quotes = "\"";
-        if (Objects.nonNull(IDEA_PLUGIN_DESCRIPTOR.getPath())) {
-            //MessageUtil.info("agentLib:" + IDEA_PLUGIN_DESCRIPTOR.getPath());
-        } else {
-            MessageUtil.warn("agentLib not exist!");
-        }
-        List<File> files = FileUtil.loopFiles(IDEA_PLUGIN_DESCRIPTOR.getPath());
-        for (File file : files) {
-            String name = file.getName();
-            if (name.startsWith(startWith) && name.endsWith(suffix)) {
-                String pathStr = FileUtil.getCanonicalPath(file);
-//                if (StrUtil.contains(pathStr, StrUtil.SPACE)) {
-//                    return StrUtil.builder().append(quotes).append(pathStr).append(quotes).toString();
-//                }
-                return pathStr;
+        Path pluginPath = IDEA_PLUGIN_DESCRIPTOR.getPluginPath();
+        if (pluginPath != null && pluginPath.toFile() != null) {
+            List<File> files = FileUtil.loopFiles(pluginPath.toFile());
+            for (File file : files) {
+                String name = file.getName();
+                if (name.startsWith(startWith) && name.endsWith(suffix)) {
+                    String pathStr = FileUtil.getCanonicalPath(file);
+                    return pathStr;
+                }
             }
         }
+        MessageUtil.warn("agentLib not exist!");
         return StrUtil.EMPTY;
     }
 
@@ -135,17 +114,42 @@ public class PluginUtils {
     }
 
     public static void saveInfoLog(String message) {
-        String infoLogPath = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/info.log";
+        String infoLogPath = getLogDir() + File.separator + "info.log";
         FileUtil.appendString(message + "\n", infoLogPath, StandardCharsets.UTF_8);
     }
 
-    public static void saveErrorLog(Throwable ex) {
+    public static String saveErrorLog(Throwable ex) {
         String message = exceptionToString(ex);
-        saveErrorLog(message);
+        return saveErrorLog(message);
     }
 
-    public static void saveErrorLog(String message) {
-        String errorLogPath = "/Users/jianyingcai/IdeaProjects/ShowRuntimeClass/error.log";
+    public static String saveErrorLog(String message) {
+        String errorLogPath = getLogDir() + File.separator + "error.log";
         FileUtil.appendString(message + "\n", errorLogPath, StandardCharsets.UTF_8);
+        return errorLogPath;
+    }
+
+    private static String getLogDir() {
+        if (logDir != null) {
+            return logDir;
+        }
+        try {
+            File parentFile = new File(getAgentCoreJarPath()).getParentFile().getParentFile();
+            logDir = parentFile.getAbsolutePath();
+            return logDir;
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void handleError(Throwable ex) {
+        String path = saveErrorLog(ex);
+        MessageUtil.infoOpenLogFile("插件错误！", path);
+    }
+
+    public static void handleError(String errorMsg) {
+        String logPath = saveErrorLog(errorMsg);
+        MessageUtil.infoOpenLogFile("插件错误！", logPath);
     }
 }

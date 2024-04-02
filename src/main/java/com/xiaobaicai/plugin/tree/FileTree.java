@@ -12,6 +12,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.Tree;
+import com.xiaobaicai.plugin.core.model.RemoteResponse;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import com.xiaobaicai.plugin.core.utils.RemoteUtil;
 import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
@@ -85,7 +86,12 @@ public class FileTree extends Tree {
                             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
                             if (selectedNode != null && selectedNode.getChildCount() == 0) {
                                 String fullClassName = getSelectedFullClassName(selectedNode);
-                                RemoteService remoteService = RemoteUtil.getRemoteService(getPort());
+                                RemoteResponse<RemoteService> response = RemoteUtil.getRemoteService(getPort());
+                                if (!response.isSuccess()) {
+                                    PluginUtils.handleError(response.getMessage());
+                                    return;
+                                }
+                                RemoteService remoteService = response.getData();
                                 if (remoteService != null) {
                                     String classFilePath = remoteService.retransFormClass(fullClassName);
                                     if (classFilePath == null) {
@@ -97,7 +103,8 @@ public class FileTree extends Tree {
                                 }
                             }
                         } catch (Throwable ex) {
-                            PluginUtils.saveErrorLog(ex);
+                            PluginUtils.handleError(ex);
+                            return;
                         }
                         // 在 UI 线程中隐藏进度条
                         ApplicationManager.getApplication().invokeLater(() -> {
@@ -189,7 +196,7 @@ public class FileTree extends Tree {
         setIconRender();
     }
 
-    private void setIconRender(){
+    private void setIconRender() {
         DefaultTreeCellRenderer cellRenderer = new DefaultTreeCellRenderer();
         cellRenderer.setLeafIcon(IconLoader.findIcon("./icons/classIcon.svg"));
         setCellRenderer(cellRenderer);

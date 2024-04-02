@@ -1,5 +1,6 @@
 package com.xiaobaicai.plugin.core.utils;
 
+import com.xiaobaicai.plugin.core.model.RemoteResponse;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 
 import java.rmi.NotBoundException;
@@ -15,17 +16,16 @@ import java.util.Set;
  */
 public class RemoteUtil {
 
-    public static RemoteService getRemoteService(Integer port) {
+    public static RemoteResponse<RemoteService> getRemoteService(Integer port) {
         RemoteService remoteAppService = null;
         try {
             Registry registry = LocateRegistry.getRegistry("127.0.0.1", port);
             remoteAppService = (RemoteService) registry.lookup("RemoteService");
-            return remoteAppService;
+            return RemoteResponse.Ok(remoteAppService);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            return RemoteResponse.fail(ExceptionUtil.exceptionToString(e));
         } catch (NotBoundException e) {
-            e.printStackTrace();
+            return RemoteResponse.fail(ExceptionUtil.exceptionToString(e));
         }
-        return null;
     }
 }

@@ -45,7 +45,7 @@ public class MessageUtil {
     }
 
     public static void infoOpenLogFile(String message, String logPath) {
-        Notification notification = new Notification("Print", "小提示", message, NotificationType.INFORMATION);
+        Notification notification = new Notification("Print", "提示", message, NotificationType.INFORMATION);
         notification.addAction(new NotificationAction("查看错误堆栈") {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
