@@ -81,26 +81,28 @@ public class FileTree extends Tree {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
+                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+                    boolean isLeafNode = (selectedNode != null && selectedNode.getChildCount() == 0);
+                    if (!isLeafNode) {
+                        return;
+                    }
                     ApplicationManager.getApplication().executeOnPooledThread(() -> {
                         try {
-                            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
-                            if (selectedNode != null && selectedNode.getChildCount() == 0) {
-                                String fullClassName = getSelectedFullClassName(selectedNode);
-                                RemoteResponse<RemoteService> response = RemoteUtil.getRemoteService(getPort());
-                                if (!response.isSuccess()) {
-                                    PluginUtils.handleError(response.getMessage());
+                            String fullClassName = getSelectedFullClassName(selectedNode);
+                            RemoteResponse<RemoteService> response = RemoteUtil.getRemoteService(getPort());
+                            if (!response.isSuccess()) {
+                                PluginUtils.handleError(response.getMessage());
+                                return;
+                            }
+                            RemoteService remoteService = response.getData();
+                            if (remoteService != null) {
+                                String classFilePath = remoteService.retransFormClass(fullClassName);
+                                if (classFilePath == null) {
+                                    System.out.println("classFilePath is null!");
                                     return;
                                 }
-                                RemoteService remoteService = response.getData();
-                                if (remoteService != null) {
-                                    String classFilePath = remoteService.retransFormClass(fullClassName);
-                                    if (classFilePath == null) {
-                                        System.out.println("classFilePath is null!");
-                                        return;
-                                    }
-                                    updateFileContent(classFilePath, project, null);
-                                    nodePathMap.put(fullClassName, classFilePath);
-                                }
+                                updateFileContent(classFilePath, project, null);
+                                nodePathMap.put(fullClassName, classFilePath);
                             }
                         } catch (Throwable ex) {
                             PluginUtils.handleError(ex);

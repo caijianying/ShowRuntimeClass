@@ -6,8 +6,6 @@ import cn.hutool.json.JSONUtil;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.module.Module;
-import com.intellij.psi.PsiJavaFile;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.xiaobaicai.plugin.constants.Constant;
@@ -20,7 +18,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author caijy
@@ -152,4 +149,5 @@ public class PluginUtils {
         String logPath = saveErrorLog(errorMsg);
         MessageUtil.infoOpenLogFile("插件错误！", logPath);
     }
+
 }

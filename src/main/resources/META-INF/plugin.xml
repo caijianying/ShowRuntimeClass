@@ -31,6 +31,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.xiaobaicai.plugin.toolwindow.ShowRuntimeClassToolWindow"
+                    icon="./icons/pluginIcon.svg"
                     id="ShowRuntimeClass" anchor="right">
 
         </toolWindow>
@@ -39,11 +40,11 @@
     </extensions>
 
     <actions>
-        <action id="showRuntimeClassAction" class="com.xiaobaicai.plugin.action.ShowRuntimeClassAction" icon="./icons/show.svg"
-                description="ShowRuntimeClass" text="ShowRuntimeClass">
+        <action id="showRuntimeClassAction2" class="com.xiaobaicai.plugin.action.ShowRuntimeClassAction"
+                icon="./icons/view.svg"
+                description="view runtime class" text="view runtime class">
             <!-- 添加到鼠标右键菜单中 -->
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-
+            <add-to-group group-id="EditorContextBarMenu" anchor="first"/>
         </action>
     </actions>
 
