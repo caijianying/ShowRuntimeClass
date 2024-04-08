@@ -62,15 +62,21 @@ public class FileScanner {
 
     private List<ClassInfoModel> scan(Project project) {
         ModuleManager moduleManager = ModuleManager.getInstance(project);
-        Module[] modules = moduleManager.getModules();
         PsiManager psiManager = PsiManager.getInstance(project);
-        for (Module module : modules) {
-            if (!module.getName().equals(project.getName())) {
-                File file = module.getModuleNioFile().toFile();
-                if (file != null) {
-                    scanFile(file.getParentFile(), psiManager, module);
-                }
+        Module[] modules = moduleManager.getModules();
+        if (modules != null && modules.length == 1) {
+            Module module = modules[0];
+            File file = module.getModuleNioFile().toFile();
+            this.scanFile(file.getParentFile(), psiManager, module);
+        } else {
+            for (Module module : modules) {
+                if (!module.getName().equals(project.getName())) {
+                    File file = module.getModuleNioFile().toFile();
+                    if (file != null) {
+                        this.scanFile(file.getParentFile(), psiManager, module);
+                    }
 
+                }
             }
         }
         return mainClasses;
