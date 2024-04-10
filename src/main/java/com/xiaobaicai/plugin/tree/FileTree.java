@@ -1,20 +1,10 @@
 package com.xiaobaicai.plugin.tree;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.Tree;
-import com.xiaobaicai.plugin.core.model.RemoteResponse;
-import com.xiaobaicai.plugin.core.service.RemoteService;
-import com.xiaobaicai.plugin.core.utils.RemoteUtil;
 import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
 import com.xiaobaicai.plugin.utils.MessageUtil;
 import com.xiaobaicai.plugin.utils.PluginUtils;
@@ -89,19 +79,13 @@ public class FileTree extends Tree {
                     ApplicationManager.getApplication().executeOnPooledThread(() -> {
                         try {
                             String fullClassName = getSelectedFullClassName(selectedNode);
-                            RemoteResponse<RemoteService> response = RemoteUtil.getRemoteService(getPort());
-                            if (!response.isSuccess()) {
-                                PluginUtils.handleError(response.getMessage());
-                                return;
+                            String classFilePath = PluginUtils.retransformClassRemotely(getPort(), fullClassName);
+                            if (classFilePath == null && nodePathMap.containsKey(fullClassName)) {
+                                classFilePath = nodePathMap.get(fullClassName);
                             }
-                            RemoteService remoteService = response.getData();
-                            if (remoteService != null) {
-                                String classFilePath = remoteService.retransFormClass(fullClassName);
-                                if (classFilePath == null) {
-                                    System.out.println("classFilePath is null!");
-                                    return;
-                                }
-                                updateFileContent(classFilePath, project, null);
+                            if (classFilePath != null) {
+                                System.out.println(classFilePath + " selected.");
+                                PluginUtils.updateEditorContent(classFilePath, editor);
                                 nodePathMap.put(fullClassName, classFilePath);
                             }
                         } catch (Throwable ex) {
@@ -139,40 +123,6 @@ public class FileTree extends Tree {
             fullClassNameList.addFirst(selectedNode.getUserObject().toString());
         }
         return String.join(".", fullClassNameList);
-    }
-
-    private void updateFileContent(String filePath, Project project, Component loadingComponent) {
-        // 在这里更新右侧文本区域的内容，根据文件名加载文件内容等操作
-        System.out.println("Selected File: " + filePath);
-        // 启动一个新线程来模拟加载文件内容的耗时操作
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            VirtualFile virtualFile = null;
-            while (true) {
-                virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
-                if (virtualFile != null) {
-                    break;
-                }
-            }
-            // 文件加载完成后，在 UI 线程中更新内容和进度条状态
-            VirtualFile finalVirtualFile = virtualFile;
-            ApplicationManager.getApplication().invokeLater(() -> {
-                // 设置编辑器文本内容
-                ApplicationManager.getApplication().runWriteAction(() -> {
-                    Document document = FileDocumentManager.getInstance().getDocument(finalVirtualFile);
-                    EditorColorsScheme colorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
-                    editor.setColorsScheme(colorsScheme);
-
-                    EditorHighlighterFactory highlighterFactory = EditorHighlighterFactory.getInstance();
-                    editor.setHighlighter(highlighterFactory.createEditorHighlighter(project, finalVirtualFile));
-                    editor.setViewer(true);
-
-                    // 设置编辑器文本内容
-                    if (document != null) {
-                        editor.getDocument().setText(document.getText());
-                    }
-                });
-            });
-        });
     }
 
     public void addNode(String availableClass) {

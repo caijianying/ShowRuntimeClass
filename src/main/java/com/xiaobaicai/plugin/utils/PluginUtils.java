@@ -5,11 +5,26 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.xiaobaicai.plugin.constants.Constant;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
+import com.xiaobaicai.plugin.core.model.RemoteResponse;
+import com.xiaobaicai.plugin.core.service.RemoteService;
+import com.xiaobaicai.plugin.core.utils.RemoteUtil;
+import com.xiaobaicai.plugin.dialog.EditorDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.rmi.RemoteException;
 import java.util.List;
 
 /**
@@ -150,4 +166,72 @@ public class PluginUtils {
         MessageUtil.infoOpenLogFile("插件错误！", logPath);
     }
 
+    public static String retransformClassRemotely(Integer port, String fullClassName) {
+        RemoteResponse<RemoteService> response = RemoteUtil.getRemoteService(port);
+        if (!response.isSuccess()) {
+            PluginUtils.handleError(response.getMessage());
+            return null;
+        }
+        RemoteService remoteService = response.getData();
+        String classFilePath = null;
+        try {
+            classFilePath = remoteService.retransFormClass(fullClassName);
+        } catch (RemoteException e) {
+            PluginUtils.handleError(e);
+        }
+        if (classFilePath == null) {
+            PluginUtils.handleError("classFilePath is null!");
+            return null;
+        }
+        return classFilePath;
+    }
+
+    public static void updateEditorContent(String filePath, EditorEx editor) {
+        // 启动一个新线程来模拟加载文件内容的耗时操作
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            VirtualFile virtualFile;
+            while (true) {
+                virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
+                if (virtualFile != null) {
+                    break;
+                }
+            }
+            // 文件加载完成后，在 UI 线程中更新内容和进度条状态
+            VirtualFile finalVirtualFile = virtualFile;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                // 设置编辑器文本内容
+                ApplicationManager.getApplication().runWriteAction(() -> {
+                    Document doc = FileDocumentManager.getInstance().getDocument(finalVirtualFile);
+                    EditorColorsScheme colorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
+                    editor.setColorsScheme(colorsScheme);
+
+                    EditorHighlighterFactory highlighterFactory = EditorHighlighterFactory.getInstance();
+                    editor.setHighlighter(highlighterFactory.createEditorHighlighter(ProjectManager.getInstance().getDefaultProject(), finalVirtualFile));
+                    editor.setViewer(true);
+
+                    // 设置编辑器文本内容
+                    if (doc != null) {
+                        editor.getDocument().setText(doc.getText());
+                    }
+                });
+            });
+        });
+    }
+
+    public static void showEditorDialog(String filePath, Project project) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            VirtualFile virtualFile;
+            while (true) {
+                virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
+                if (virtualFile != null) {
+                    break;
+                }
+            }
+            VirtualFile finalVirtualFile = virtualFile;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                EditorDialog dialog = new EditorDialog(finalVirtualFile, project);
+                dialog.show();
+            });
+        });
+    }
 }

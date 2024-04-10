@@ -1,13 +1,13 @@
 package com.xiaobaicai.plugin.utils;
 
-import com.intellij.ide.lightEdit.LightEditService;
 import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xiaobaicai.plugin.constants.Constant;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -47,10 +47,11 @@ public class MessageUtil {
     public static void infoOpenLogFile(String message, String logPath) {
         Notification notification = new Notification("Print", "提示", message, NotificationType.INFORMATION);
         notification.addAction(new NotificationAction("查看错误堆栈") {
+            @SneakyThrows
             @Override
             public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
                 VirtualFile virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(logPath);
-                LightEditService.getInstance().openFile(virtualFile);
+                FileEditorManager.getInstance(e.getProject()).openFile(virtualFile, true);
             }
         });
         Notifications.Bus.notify(notification, null);

@@ -36,18 +36,13 @@ public class PluginAgent {
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
-        log.info("PluginAgent....agentmain,agentArgs: " + agentArgs);
-        System.out.println("PluginAgent....agentmain,agentArgs: " + agentArgs);
+        System.out.println("PluginAgent.agentmain, attached: " + agentArgs);
         AttachVmInfoDTO infoDTO = JSONUtil.toBean(agentArgs, AttachVmInfoDTO.class);
-        String targetClassName = infoDTO.getTargetClassName();
         Integer port = infoDTO.getPort();
-        Map<String, ClassLoader> classLoaderMap = new HashMap<>();
         Class<?>[] canBeRetransformedClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(c -> inst.isModifiableClass(c) && !c.isArray()).toArray(Class[]::new);
-        RemoteService remoteService = null;
-        if (targetClassName == null) {
-            Set<Class> classSet = Arrays.stream(canBeRetransformedClasses).collect(Collectors.toSet());
-            remoteService = startServer(port, classSet, inst);
-        }
+        Set<Class> classSet = Arrays.stream(canBeRetransformedClasses).collect(Collectors.toSet());
+        RemoteService remoteService = startServer(port, classSet, inst);
+
         System.out.println("pid is : " + RuntimeMXBeanUtil.getPid());
         DumpClassFileTransformer transformer = new DumpClassFileTransformer(RuntimeMXBeanUtil.getPid() + "", port, remoteService);
         inst.addTransformer(transformer, true);
@@ -66,26 +61,11 @@ public class PluginAgent {
                 }
             }
         }
-
-        for (Class loadedClass : canBeRetransformedClasses) {
-            System.out.println(loadedClass.getName());
-            classLoaderMap.put(loadedClass.getName(), loadedClass.getClassLoader());
-            if (loadedClass.getName().equals(targetClassName)) {
-                try {
-                    inst.retransformClasses(loadedClass);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-                } finally {
-                    inst.removeTransformer(transformer);
-                }
-            }
-        }
     }
 
     public static class DumpClassFileTransformer implements ClassFileTransformer {
 
         private String pid;
-        private Integer port;
         private RemoteService remoteService;
 
         public String getPid() {
@@ -94,7 +74,6 @@ public class PluginAgent {
 
         public DumpClassFileTransformer(String pid, Integer port, RemoteService remoteService) {
             this.pid = pid;
-            this.port = port;
             this.remoteService = remoteService;
         }
 
@@ -144,7 +123,6 @@ public class PluginAgent {
             registry.rebind("RemoteService", remoteService);
             System.out.println("RMI Server is running.");
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("RMI Server is running error.");
         }
 

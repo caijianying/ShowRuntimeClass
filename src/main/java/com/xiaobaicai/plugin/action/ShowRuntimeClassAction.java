@@ -4,7 +4,9 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
+import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.MouseChecker;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,15 +15,17 @@ import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.awt.RelativePoint;
+import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
 import com.xiaobaicai.plugin.dialog.CompletionProvider;
 import com.xiaobaicai.plugin.model.MatchedVmModel;
 import com.xiaobaicai.plugin.scan.FileScanner;
+import com.xiaobaicai.plugin.utils.PluginUtils;
+import com.xiaobaicai.plugin.utils.ProjectCache;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,12 +38,14 @@ public class ShowRuntimeClassAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         VirtualFile virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        String targetClassName = "";
         if (virtualFile.getName().endsWith(".java")) {
             PsiFile file = PsiManager.getInstance(e.getProject()).findFile(virtualFile);
             if (file instanceof PsiJavaFile) {
                 PsiJavaFile javaFile = (PsiJavaFile) file;
                 String packageName = javaFile.getPackageName();
                 System.out.println(packageName);
+                targetClassName = packageName + "." + javaFile.getName().replace(".java", "");
             }
         }
 
@@ -53,8 +59,28 @@ public class ShowRuntimeClassAction extends AnAction {
 
         // 创建一个面板，用于放置输入框
         JPanel panel = new JPanel(new BorderLayout());
-//        panel.add(new JLabel("Main Class"));
         panel.add(mainClassAutoCompletion);
+
+        String finalTargetClassName = targetClassName;
+        mainClassAutoCompletion.addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull DocumentEvent event) {
+                String showName = event.getDocument().getText();
+                completionProvider.handleMainClassChoosedForEditor(showName, m -> {
+                    String mainClass = m.getMainClass();
+                    Integer port = ProjectCache.getInstance().getMainClassPort(mainClass);
+
+                    AttachVmInfoDTO infoDTO = new AttachVmInfoDTO();
+                    infoDTO.setPort(port);
+                    infoDTO.setPid(m.getPid());
+                    PluginUtils.attach(infoDTO);
+                    String filePath = PluginUtils.retransformClassRemotely(port, finalTargetClassName);
+                    if (filePath != null) {
+                        PluginUtils.showEditorDialog(filePath,e.getProject());
+                    }
+                });
+            }
+        });
 
         Component component = e.getInputEvent().getComponent();
         Point locationOnScreen = component.getLocationOnScreen();
@@ -65,7 +91,7 @@ public class ShowRuntimeClassAction extends AnAction {
         Point popupLocation = new Point(x - 200, y);
 
         // 创建一个弹窗
-        JBPopupFactory.getInstance()
+        JBPopup jbPopup = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(panel, mainClassAutoCompletion)
                 .setCancelOnWindowDeactivation(true)
                 .setRequestFocus(true)
@@ -78,7 +104,7 @@ public class ShowRuntimeClassAction extends AnAction {
                 .setCancelOnMouseOutCallback(new MouseChecker() {
                     @Override
                     public boolean check(MouseEvent mouseEvent) {
-                        ApplicationManager.getApplication().invokeLater(()->{
+                        ApplicationManager.getApplication().invokeLater(() -> {
                             mainClassAutoCompletion.setShowPlaceholderWhenFocused(true);
                             mainClassAutoCompletion.setPlaceholder("Main Class");
                         });
@@ -87,7 +113,9 @@ public class ShowRuntimeClassAction extends AnAction {
                 })
                 .setCancelKeyEnabled(true)
                 .setCancelCallback(() -> true)
-                .createPopup()
-                .show(new RelativePoint(popupLocation));
+                .createPopup();
+        jbPopup.show(new RelativePoint(popupLocation));
     }
+
+
 }

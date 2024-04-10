@@ -39,7 +39,7 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
         ShowRuntimeClassPage page = new ShowRuntimeClassPage(project, vmModel -> {
             AttachVmInfoDTO vmInfoDTO = new AttachVmInfoDTO();
             vmInfoDTO.setPid(vmModel.getPid());
-            vmInfoDTO.setPort(NetUtil.getUsableLocalPort());
+            vmInfoDTO.setPort(ProjectCache.getInstance().getMainClassPort(vmModel.getMainClass()));
             Set<String> availableClasses = null;
             try {
                 PluginUtils.attach(vmInfoDTO);
@@ -57,8 +57,6 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
                 PluginUtils.handleError(e);
             }
 
-            // 保存app->port的映射
-            ProjectCache.getInstance().mainClassPortMap.put(vmModel.getMainClass(), vmInfoDTO.getPort());
             MatchedVmReturnModel returnModel = new MatchedVmReturnModel();
             returnModel.setClasses(availableClasses);
             returnModel.setPort(vmInfoDTO.getPort());

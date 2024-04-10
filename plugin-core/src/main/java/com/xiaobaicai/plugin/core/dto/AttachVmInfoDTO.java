@@ -17,5 +17,4 @@ public class AttachVmInfoDTO implements Serializable {
 
     private String pid;
 
-    private String targetClassName;
 }

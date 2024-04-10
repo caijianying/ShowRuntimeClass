@@ -1,5 +1,6 @@
 package com.xiaobaicai.plugin.utils;
 
+import cn.hutool.core.net.NetUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -32,5 +33,14 @@ public class ProjectCache implements PersistentStateComponent<ProjectCache> {
     @Override
     public void loadState(@NotNull ProjectCache projectCache) {
         this.mainClassPortMap = projectCache.mainClassPortMap;
+    }
+
+    public Integer getMainClassPort(String mainClass) {
+        Integer port = mainClassPortMap.get(mainClass);
+        if (port == null) {
+            port = NetUtil.getUsableLocalPort();
+            mainClassPortMap.put(mainClass, port);
+        }
+        return port;
     }
 }

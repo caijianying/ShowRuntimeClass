@@ -2,36 +2,22 @@ package com.xiaobaicai.plugin.toolwindow;
 
 import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.impl.DocumentImpl;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
-import com.intellij.ui.GotItTooltip;
-import com.intellij.ui.IconWrapperWithToolTip;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.roots.ToolbarPanel;
-import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
 import com.xiaobaicai.plugin.dialog.CompletionProvider;
-import com.xiaobaicai.plugin.model.ClassInfoModel;
 import com.xiaobaicai.plugin.model.MatchedVmModel;
 import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
 import com.xiaobaicai.plugin.scan.FileScanner;
 import com.xiaobaicai.plugin.tree.FileTree;
-import com.xiaobaicai.plugin.utils.PluginUtils;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,14 +25,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.io.File;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -86,27 +66,12 @@ public class ShowRuntimeClassPage {
         // 查找启动类输入框
         mainClassAutoCompletion = new TextFieldWithAutoCompletion(this.project, completionProvider, true, null);
         mainClassAutoCompletion.addDocumentListener(new DocumentListener() {
-            @Override
-            public void beforeDocumentChange(@NotNull DocumentEvent event) {
-                System.out.println("textFieldWithAutoCompletion.beforeDocumentChange: " + event.getDocument().getText());
-            }
-
             @SneakyThrows
             @Override
             public void documentChanged(@NotNull DocumentEvent event) {
                 String showName = event.getDocument().getText();
                 System.out.println("textFieldWithAutoCompletion.documentChanged: " + showName);
-                boolean matched = completionProvider.getShowNameVmMap().containsKey(showName);
-                if (matched) {
-                    MatchedVmModel vmModel = completionProvider.getShowNameVmMap().get(showName);
-                    Future<MatchedVmReturnModel> modelFuture = ApplicationManager.getApplication().executeOnPooledThread(new Callable<MatchedVmReturnModel>() {
-                        @Override
-                        public MatchedVmReturnModel call() {
-                            return callback.apply(vmModel);
-                        }
-                    });
-                    fileTree.handleFutureVmProcessChoosed(modelFuture);
-                }
+                completionProvider.handleMainClassChoosed(showName, callback, fileTree);
             }
         });
         mainClassAutoCompletion.addFocusListener(new FocusAdapter() {
