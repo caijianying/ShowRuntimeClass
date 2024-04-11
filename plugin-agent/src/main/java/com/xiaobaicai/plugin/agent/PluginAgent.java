@@ -8,7 +8,6 @@ import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class PluginAgent {
         RemoteService remoteService = startServer(port, classSet, inst);
 
         System.out.println("pid is : " + RuntimeMXBeanUtil.getPid());
-        DumpClassFileTransformer transformer = new DumpClassFileTransformer(RuntimeMXBeanUtil.getPid() + "", port, remoteService);
+        DumpClassFileTransformer transformer = new DumpClassFileTransformer(RuntimeMXBeanUtil.getPid() + "", remoteService);
         inst.addTransformer(transformer, true);
 
         // 添加到启动类加载器，为了让所有classloader能加载到agent包中的类
@@ -72,7 +71,7 @@ public class PluginAgent {
             return pid;
         }
 
-        public DumpClassFileTransformer(String pid, Integer port, RemoteService remoteService) {
+        public DumpClassFileTransformer(String pid, RemoteService remoteService) {
             this.pid = pid;
             this.remoteService = remoteService;
         }

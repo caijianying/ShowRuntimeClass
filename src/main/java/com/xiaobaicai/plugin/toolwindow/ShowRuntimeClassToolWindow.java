@@ -1,6 +1,5 @@
 package com.xiaobaicai.plugin.toolwindow;
 
-import cn.hutool.core.net.NetUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.intellij.openapi.actionSystem.*;
@@ -84,15 +83,6 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
         };
         usageAction.getTemplatePresentation().setText("Usage");
 
-        AnAction faqAction = new AnAction(IconLoader.findIcon("./icons/faq.svg")) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent e) {
-                // 在这里可以处理动作被触发时的逻辑
-                // 例如，弹出一个菜单或者执行其他操作
-                System.out.println("faqAction triggered!");
-            }
-        };
-        faqAction.getTemplatePresentation().setText("FAQ");
-        toolWindow.setTitleActions(Lists.newArrayList(usageAction, faqAction));
+        toolWindow.setTitleActions(Lists.newArrayList(usageAction));
     }
 }

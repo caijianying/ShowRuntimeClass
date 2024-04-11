@@ -1,6 +1,5 @@
 package com.xiaobaicai.plugin.agent.service;
 
-import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 
 import java.lang.instrument.Instrumentation;
@@ -42,7 +41,6 @@ public class RemoteAppService extends UnicastRemoteObject implements RemoteServi
 
     @Override
     public void setClassPath(String className, String filePath) {
-        System.out.println("setClassPath: " + System.currentTimeMillis());
         className = className.replace("/", ".");
         availableClassesMap.put(className, filePath);
     }
@@ -57,7 +55,6 @@ public class RemoteAppService extends UnicastRemoteObject implements RemoteServi
                 ex.printStackTrace();
             }
         }
-        System.out.println("retransFormClass: " + targetClass);
         return availableClassesMap.get(targetClass);
     }
 

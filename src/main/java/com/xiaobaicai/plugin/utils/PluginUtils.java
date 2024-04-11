@@ -180,7 +180,7 @@ public class PluginUtils {
             PluginUtils.handleError(e);
         }
         if (classFilePath == null) {
-            PluginUtils.handleError("classFilePath is null!");
+//            PluginUtils.handleError("classFilePath is null!");
             return null;
         }
         return classFilePath;
