@@ -64,7 +64,7 @@ public class CompletionProvider extends TextFieldWithAutoCompletionListProvider<
         boolean matched = this.getShowNameVmMap().containsKey(showName);
         if (matched) {
             MatchedVmModel vmModel = this.getShowNameVmMap().get(showName);
-            consumer.accept(vmModel);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> consumer.accept(vmModel));
         }
 
     }

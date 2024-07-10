@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBScrollPane;
@@ -46,7 +45,7 @@ public class EditorDialog extends DialogWrapper {
         EditorColorsScheme colorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
         editor.setColorsScheme(colorsScheme);
         EditorHighlighterFactory highlighterFactory = EditorHighlighterFactory.getInstance();
-        editor.setHighlighter(highlighterFactory.createEditorHighlighter(ProjectManager.getInstance().getDefaultProject(), this.virtualFile));
+        editor.setHighlighter(highlighterFactory.createEditorHighlighter(this.project, this.virtualFile));
         editor.setViewer(true);
         JBScrollPane scrollPane = new JBScrollPane(editor.getComponent());
         return scrollPane;
