@@ -56,7 +56,7 @@ public class PluginAgent {
                 try {
                     inst.appendToBootstrapClassLoaderSearch(new JarFile(new File(jarFile)));
                 } catch (IOException e) {
-                    e.printStackTrace();
+
                 }
             }
         }

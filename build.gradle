@@ -68,7 +68,7 @@ test {
 //所有项目配置
 allprojects {
     group 'com.xiaobaicai.plugin'
-    version '1.0'
+    version "$rootProject.ext.plugin.version"
 
     apply plugin: 'idea'
     apply plugin: 'java'

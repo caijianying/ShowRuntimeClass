@@ -73,7 +73,7 @@ public class FileTree extends Tree {
                 if (e.getClickCount() == 1) {
                     DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
                     boolean isLeafNode = (selectedNode != null && selectedNode.getChildCount() == 0);
-                    if (!isLeafNode) {
+                    if (!isLeafNode || selectedNode.isRoot()) {
                         return;
                     }
                     ApplicationManager.getApplication().executeOnPooledThread(() -> {

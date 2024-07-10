@@ -1,24 +1,28 @@
 <idea-plugin>
     <id>com.xiaobaicai.plugin</id>
     <vendor url="https://blog.caijy.top/" email="XiaoBaiCai5811@163.com"/>
-    <name>FindRuntimeClass</name>
+    <name>ShowRuntimeClass</name>
     <description><![CDATA[
-        The purpose of this plugin was to enable developers to view class files in the JVM memory while learning about the bytecode framework. If you find the plugin useful, please give it a good rating! Your approval is the driving force behind its updates.
+        The purpose of this plugin was to enable developers to view class files in the JVM memory while learning about
+        the bytecode framework. If you find the plugin useful, please give it a good rating! Your approval is the
+        driving force behind its updates.
         <br/>
-        <br/>此插件开发出来的初衷是为了能让开发者在学习字节码框架时，能看到此时JVM内存中的class文件。
-        <br/>如果觉得插件好用，感谢给个好评！🙏🙏🙏 大家的认可是插件更新的动力！</a>
+        <br/>此插件开发出来的初衷是为了能让开发者在学习字节码框架时，能看到运行时JVM内存中的class文件。
+        <br/>如果觉得插件好用，感谢给个好评！🙏🙏🙏 大家的认可是插件更新的动力！
+        <br/>
+        <br/>
+        <img src="https://blog.caijy.top/assets/plugins/showRuntimeClass/static/screenshot/usage.gif" alt="usage">
+            图片加载不出来点<a href="https://blog.caijy.top/assets/plugins/showRuntimeClass/static/screenshot/usage.gif">这里</a>查看
+        </img>
         ]]></description>
     <vendor>小白菜</vendor>
 
     <change-notes><![CDATA[
-        <h3>V20240301</h3>
+        <h3>V20240710</h3>
         <ul>
-            <li>fix some bugs</li>
-        </ul>
-
-        <h3>V20240301</h3>
-        <ul>
-            <li>修复了一些bug</li>
+            <li>UI界面</li>
+            <li>字节码增强</li>
+            <li>Rpc调用通信</li>
         </ul>
         ]]>
     </change-notes>
