@@ -186,7 +186,7 @@ public class PluginUtils {
         return classFilePath;
     }
 
-    public static void updateEditorContent(String filePath, EditorEx editor) {
+    public static void updateEditorContent(String filePath, EditorEx editor, Project project) {
         // 启动一个新线程来模拟加载文件内容的耗时操作
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             VirtualFile virtualFile;
@@ -206,7 +206,7 @@ public class PluginUtils {
                     editor.setColorsScheme(colorsScheme);
 
                     EditorHighlighterFactory highlighterFactory = EditorHighlighterFactory.getInstance();
-                    editor.setHighlighter(highlighterFactory.createEditorHighlighter(ProjectManager.getInstance().getDefaultProject(), finalVirtualFile));
+                    editor.setHighlighter(highlighterFactory.createEditorHighlighter(project, finalVirtualFile));
                     editor.setViewer(true);
 
                     // 设置编辑器文本内容

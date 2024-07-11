@@ -85,7 +85,7 @@ public class FileTree extends Tree {
                             }
                             if (classFilePath != null) {
                                 System.out.println(classFilePath + " selected.");
-                                PluginUtils.updateEditorContent(classFilePath, editor);
+                                PluginUtils.updateEditorContent(classFilePath, editor, project);
                                 nodePathMap.put(fullClassName, classFilePath);
                             }
                         } catch (Throwable ex) {
@@ -222,7 +222,7 @@ public class FileTree extends Tree {
                 PluginUtils.saveErrorLog(ex);
             }
             if (returnModel == null) {
-                MessageUtil.infoOpenToolWindow("出现异常!");
+                MessageUtil.info("出现异常!");
                 return;
             }
             Set<String> allAvailableClasses = returnModel.getClasses();

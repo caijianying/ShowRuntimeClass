@@ -3,13 +3,12 @@ package com.xiaobaicai.plugin.scan;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiMethodUtil;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import com.xiaobaicai.plugin.model.ClassInfoModel;
@@ -66,16 +65,19 @@ public class FileScanner {
         Module[] modules = moduleManager.getModules();
         if (modules != null && modules.length == 1) {
             Module module = modules[0];
-            File file = module.getModuleNioFile().toFile();
-            this.scanFile(file.getParentFile(), psiManager, module);
+            String dirPath = ModuleUtil.getModuleDirPath(module);
+            if (dirPath != null) {
+                File file = new File(dirPath);
+                this.scanFile(file, psiManager, module);
+            }
         } else {
             for (Module module : modules) {
                 if (!module.getName().equals(project.getName())) {
-                    File file = module.getModuleNioFile().toFile();
-                    if (file != null) {
-                        this.scanFile(file.getParentFile(), psiManager, module);
+                    String dirPath = ModuleUtil.getModuleDirPath(module);
+                    if (dirPath != null) {
+                        File file = new File(dirPath);
+                        this.scanFile(file, psiManager, module);
                     }
-
                 }
             }
         }

@@ -12,7 +12,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.roots.ToolbarPanel;
 import com.xiaobaicai.plugin.dialog.CompletionProvider;
 import com.xiaobaicai.plugin.model.MatchedVmModel;
 import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
@@ -151,6 +150,6 @@ public class ShowRuntimeClassPage {
         this.jPanel.revalidate();
         this.jPanel.repaint();
 
-        return jPanel;
+        return this.jPanel;
     }
 }

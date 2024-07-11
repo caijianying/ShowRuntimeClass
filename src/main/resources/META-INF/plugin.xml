@@ -18,6 +18,11 @@
     <vendor>小白菜</vendor>
 
     <change-notes><![CDATA[
+        <h3>V20240711</h3>
+        <ul>
+            <li>优化attach时界面卡顿问题</li>
+        </ul>
+
         <h3>V20240710</h3>
         <ul>
             <li>UI界面</li>
