@@ -7,9 +7,10 @@
 # 介绍
 idea插件，用于显示运行时class
 
-# 实现原理
+# 实现原理及关键技术
 * JavaAgent的Attach机制
 * JDK自带的RPC通信
+* IntelliJ Platform Plugin SDK
 
 ## 普通用法
 ![usage](https://github.com/user-attachments/assets/a57270ef-e96f-45e6-bd83-ee79484caa6f)
