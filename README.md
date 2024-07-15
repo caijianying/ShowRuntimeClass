@@ -1,7 +1,7 @@
 # ShowRuntimeClass
 
 [![AUR](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/caijianying/ShowRuntimeClass/blob/main/LICENSE)
-[![](https://img.shields.io/badge/Author-小白菜-orange.svg)](https://caijianying.github.com)
+[![](https://img.shields.io/badge/Author-小白菜-orange.svg)](https://caijianying.github.io)
 [![](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/caijianying/ShowRuntimeClass)
 
 # 介绍
