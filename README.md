@@ -18,6 +18,9 @@ idea插件，用于显示运行时class
 ## 快捷用法
 ![quick](https://github.com/user-attachments/assets/50b45bca-7c8b-4ae5-81a4-c0ec6e4e2bd9)
 
+## 感谢
+https://github.com/zifeihan/friday
+
 ## 最后
 若觉得有方便到您，欢迎Star哦.若有建议，请提Issue.大家共同进步！
 
