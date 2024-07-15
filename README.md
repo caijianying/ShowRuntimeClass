@@ -3,6 +3,7 @@
 [![AUR](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/caijianying/ShowRuntimeClass/blob/main/LICENSE)
 [![](https://img.shields.io/badge/Author-小白菜-orange.svg)](https://caijianying.github.io)
 [![](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/caijianying/ShowRuntimeClass)
+[![AUR](https://img.shields.io/badge/Plugin%20Home-ShowRuntimeClass-blue.svg)](https://plugins.jetbrains.com/plugin/24820-showruntimeclass)
 
 # 介绍
 idea插件，用于显示运行时class
