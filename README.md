@@ -20,8 +20,23 @@ idea插件，用于显示运行时class
 ![quick](https://github.com/user-attachments/assets/50b45bca-7c8b-4ae5-81a4-c0ec6e4e2bd9)
 
 ## 感谢
-https://github.com/zifeihan/friday
+感谢受到此项目的启发：https://github.com/zifeihan/friday
 
 ## 最后
 若觉得有方便到您，欢迎Star哦.若有建议，请提Issue.大家共同进步！
+
+## 贡献者
+感谢以下贡献者对仓库的贡献
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/code142857">
+        <img src="https://avatars.githubusercontent.com/u/32949827?v=4" width="100px;" alt="code142857"/>
+        <br />
+        <sub><b>code142857</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
