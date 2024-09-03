@@ -1,18 +1,24 @@
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "6.1.0"
+    id 'org.jetbrains.intellij.platform.module'
 }
 
 group 'com.xiaobaicai.plugin'
 version "$rootProject.ext.plugin.version"
-sourceCompatibility = 1.8
+
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation project(":plugin-core")
+    intellijPlatform {
+        pluginModule(implementation(project(':plugin-core')))
+    }
+
 }
 
 shadowJar {

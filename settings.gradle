@@ -1,4 +1,4 @@
 rootProject.name = 'ShowRuntimeClass'
-include 'plugin-agent'
-include 'plugin-core'
+include ':plugin-agent'
+include ':plugin-core'
 
