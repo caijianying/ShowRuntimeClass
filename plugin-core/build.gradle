@@ -1,22 +1,18 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij.platform.module'
 }
 
 group 'com.xiaobaicai.plugin'
 version '1.0'
 
+sourceCompatibility = 21
+targetCompatibility = 21
+
 repositories {
     mavenCentral()
-    intellijPlatform {
-        defaultRepositories()
-    }
 }
 
 dependencies {
-    intellijPlatform {
-        intellijIdeaUltimate '2024.2.0.1'
-    }
 }
 
 test {

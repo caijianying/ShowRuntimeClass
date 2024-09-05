@@ -38,7 +38,7 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         // 中心内容
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = ContentFactory.getInstance();
         ShowRuntimeClassPage page = new ShowRuntimeClassPage(project, vmModel -> {
             AttachVmInfoDTO vmInfoDTO = new AttachVmInfoDTO();
             vmInfoDTO.setPid(vmModel.getPid());

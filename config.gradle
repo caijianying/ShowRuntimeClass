@@ -19,7 +19,7 @@ ext {
             "apache-dubbo"        : 'org.apache.dubbo:dubbo:2.7.0',
             "spring-web"          : 'org.springframework:spring-web:5.2.4.RELEASE',
             "slf4j"               : 'org.slf4j:slf4j-api:1.7.36',
-            "lombok"              : 'org.projectlombok:lombok:1.18.2',
+            "lombok"              : 'org.projectlombok:lombok:1.18.34',
             "fastjson"            : 'com.alibaba:fastjson:1.2.79',
             "javassist"           : 'javassist:javassist:3.12.1.GA',
             "byte-buddy"          : 'net.bytebuddy:byte-buddy:1.12.6',

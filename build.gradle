@@ -10,10 +10,10 @@ apply from: 'config.gradle'
 group 'com.xiaobaicai.plugin'
 version "$rootProject.ext.plugin.version"
 
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = 21
+targetCompatibility = 21
 
-
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 repositories {
     mavenCentral()
 
@@ -25,6 +25,8 @@ repositories {
 
 
 dependencies {
+    implementation project(":plugin-core")
+    implementation project(path: ':plugin-agent', configuration: 'shadow')
     implementation rootProject.ext.dependencies["hutool-all"]
     annotationProcessor rootProject.ext.dependencies["lombok"]
     compileOnly rootProject.ext.dependencies["lombok"]
@@ -37,14 +39,17 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        pluginModule(implementation(project(':plugin-core')))
         bundledPlugin 'com.intellij.java'
 
         def type = providers.gradleProperty('platformType')
         def version = providers.gradleProperty('platformVersion')
         create(type, version)
 
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
 
+        testFramework TestFrameworkType.Platform.INSTANCE
     }
 }
 
@@ -92,8 +97,8 @@ allprojects {
     apply plugin: 'idea'
     apply plugin: 'java'
 
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = 21
+    targetCompatibility = 21
 }
 
 //所有子项目的通用配置
