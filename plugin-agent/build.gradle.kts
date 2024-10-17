@@ -13,7 +13,7 @@ val versions = extra["versions"] as Map<*, *>
 var projectVersion = "${extra["projectVersion"]}"
 
 group = "com.xiaobaicai.plugin"
-version "${projectVersion}"
+version = projectVersion
 
 repositories {
     mavenCentral()
@@ -42,9 +42,9 @@ kotlin {
 tasks.withType<ShadowJar> {
     manifest {
         attributes(
-            "Implementation-Version" to "${projectVersion}",
+            "Implementation-Version" to projectVersion,
             "Implementation-Title" to rootProject.name,
-            "Manifest-Version" to "${projectVersion}",
+            "Manifest-Version" to projectVersion,
             "Premain-Class" to "com.xiaobaicai.plugin.agent.PluginAgent",
             "Agent-Class" to "com.xiaobaicai.plugin.agent.PluginAgent",
             "Can-Redefine-Classes" to true,

@@ -15,10 +15,10 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
-    testCompileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("${versions["lombok"]}")
+    compileOnly("${versions["lombok"]}")
+    testAnnotationProcessor("${versions["lombok"]}")
+    testCompileOnly("${versions["lombok"]}")
     testImplementation(kotlin("test"))
 }
 

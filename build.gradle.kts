@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.support.listFilesOrdered
-
 plugins {
     id("java")
     id("distribution")
@@ -52,6 +50,9 @@ intellijPlatform {
             sinceBuild = "241"
             untilBuild = "243.*"
         }
+    }
+    publishing {
+        token = providers.environmentVariable("pluginToken")
     }
 }
 
