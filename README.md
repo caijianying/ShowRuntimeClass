@@ -6,12 +6,16 @@
 [![AUR](https://img.shields.io/badge/Plugin%20Home-ShowRuntimeClass-blue.svg)](https://plugins.jetbrains.com/plugin/24820-showruntimeclass)
 
 # 介绍
-idea插件，用于显示运行时class
+idea插件，用于显示运行时class。
+
+支持Java单体项目和模块化项目。
+
+支持JDK17及以上版本，支持IDEA2024版本。
 
 # 实现原理及关键技术
 * JavaAgent的Attach机制
 * JDK自带的RPC通信
-* IntelliJ Platform Plugin SDK
+* IntelliJ Platform Plugin SDK 2.x
 
 ## 普通用法
 ![usage](https://github.com/user-attachments/assets/a57270ef-e96f-45e6-bd83-ee79484caa6f)

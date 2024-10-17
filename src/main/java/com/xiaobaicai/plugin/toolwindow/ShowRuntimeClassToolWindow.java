@@ -2,7 +2,8 @@ package com.xiaobaicai.plugin.toolwindow;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.util.IconLoader;
@@ -38,7 +39,7 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         // 中心内容
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = ContentFactory.getInstance();
         ShowRuntimeClassPage page = new ShowRuntimeClassPage(project, vmModel -> {
             AttachVmInfoDTO vmInfoDTO = new AttachVmInfoDTO();
             vmInfoDTO.setPid(vmModel.getPid());
@@ -54,8 +55,6 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
                 RemoteService remoteService = response.getData();
                 String classStr = remoteService.getAllAvailableClasses();
                 availableClasses = Sets.newHashSet(classStr.split(","));
-            } catch (RemoteException e) {
-                PluginUtils.handleError(e);
             } catch (Exception e) {
                 PluginUtils.handleError(e);
             }
@@ -72,7 +71,7 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
 
         String step1Message="1. 输入当前项目下的启动类，插件会自动为你匹配到运行的进程！";
         String step2Message="2. 查找该进程中运行时的class";
-        Icon usageIcon = IconLoader.findIcon("./icons/usage.svg");
+        Icon usageIcon = IconLoader.findIcon("/icons/usage.svg");
         TextFieldWithAutoCompletion mainClassAutoCompletion = page.mainClassAutoCompletion;
         TextFieldWithAutoCompletion classNamesCompletion = page.classNamesCompletion;
         AnAction usageAction = new AnAction(usageIcon) {

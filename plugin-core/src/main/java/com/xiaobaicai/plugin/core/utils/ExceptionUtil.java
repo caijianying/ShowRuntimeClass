@@ -1,7 +1,5 @@
 package com.xiaobaicai.plugin.core.utils;
 
-import cn.hutool.core.io.FileUtil;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 

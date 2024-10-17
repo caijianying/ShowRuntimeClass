@@ -14,7 +14,6 @@ import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.sun.tools.attach.AgentLoadException;
@@ -88,7 +87,7 @@ public class PluginUtils {
 
     public static String getAgentCoreJarPath() {
         if (agentJarPath == null) {
-            agentJarPath = getJarPath(Constant.AGENT_PREFIX, Constant.AGENT_SUFFIX);
+            agentJarPath = getJarPath();
         }
         return agentJarPath;
     }
@@ -96,18 +95,16 @@ public class PluginUtils {
     /**
      * 根据jar包的前缀名称获路径
      *
-     * @param startWith 前缀名称
      * @return String
      */
-    private static String getJarPath(String startWith, String suffix) {
+    private static String getJarPath() {
         Path pluginPath = IDEA_PLUGIN_DESCRIPTOR.getPluginPath();
         if (pluginPath != null && pluginPath.toFile() != null) {
             List<File> files = FileUtil.loopFiles(pluginPath.toFile());
             for (File file : files) {
                 String name = file.getName();
-                if (name.startsWith(startWith) && name.endsWith(suffix)) {
-                    String pathStr = FileUtil.getCanonicalPath(file);
-                    return pathStr;
+                if (name.startsWith(Constant.AGENT_PREFIX) && name.endsWith(Constant.AGENT_SUFFIX)) {
+                    return FileUtil.getCanonicalPath(file);
                 }
             }
         }

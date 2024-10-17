@@ -19,7 +19,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -150,7 +151,7 @@ public class FileTree extends Tree {
 
     private void setIconRender() {
         DefaultTreeCellRenderer cellRenderer = new DefaultTreeCellRenderer();
-        cellRenderer.setLeafIcon(IconLoader.findIcon("./icons/classIcon.svg"));
+        cellRenderer.setLeafIcon(IconLoader.findIcon("/icons/classIcon.svg"));
         setCellRenderer(cellRenderer);
     }
 

@@ -3,6 +3,7 @@ package com.xiaobaicai.plugin.toolwindow;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class ToolbarPanel extends JPanel {
         }
 
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(toolbarPlace, actions, true);
-        this.add(actionToolbar.getComponent(), new GridBagConstraints(0, -1, 1, 1, 1.0D, 0.0D, 17, 2, new Insets(0, 0, 0, 0), 0, 0));
-        this.add(contentComponent, new GridBagConstraints(0, -1, 1, 1, 1.0D, 1.0D, 17, 1, new Insets(0, 0, 0, 0), 0, 0));
+        this.add(actionToolbar.getComponent(), new GridBagConstraints(0, -1, 1, 1, 1.0D, 0.0D, 17, 2, JBUI.emptyInsets(), 0, 0));
+        this.add(contentComponent, new GridBagConstraints(0, -1, 1, 1, 1.0D, 1.0D, 17, 1, JBUI.emptyInsets(), 0, 0));
     }
 }

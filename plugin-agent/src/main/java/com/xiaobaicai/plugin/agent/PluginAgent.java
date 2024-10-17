@@ -1,13 +1,16 @@
 package com.xiaobaicai.plugin.agent;
 
 import cn.hutool.json.JSONUtil;
-import com.xiaobaicai.plugin.agent.utils.RuntimeMXBeanUtil;
 import com.xiaobaicai.plugin.agent.service.RemoteAppService;
+import com.xiaobaicai.plugin.agent.utils.RuntimeMXBeanUtil;
+import com.xiaobaicai.plugin.core.boot.AgentPkgNotFoundException;
 import com.xiaobaicai.plugin.core.boot.AgentPkgPath;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
+import com.xiaobaicai.plugin.core.log.Logger;
+import com.xiaobaicai.plugin.core.log.LoggerFactory;
 import com.xiaobaicai.plugin.core.service.RemoteService;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +21,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
@@ -27,22 +31,23 @@ import java.util.stream.Collectors;
  * @description
  * @date 2024/3/6 星期三 3:04 下午
  */
-@Slf4j
 public class PluginAgent {
+
+    private static final Logger logger = LoggerFactory.getLogger(PluginAgent.class);
 
     public static void premain(String agentArgs, Instrumentation inst) {
 
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
-        System.out.println("PluginAgent.agentmain, attached: " + agentArgs);
+        logger.info("Plugin agent attached.");
         AttachVmInfoDTO infoDTO = JSONUtil.toBean(agentArgs, AttachVmInfoDTO.class);
         Integer port = infoDTO.getPort();
         Class<?>[] canBeRetransformedClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(c -> inst.isModifiableClass(c) && !c.isArray()).toArray(Class[]::new);
         Set<Class> classSet = Arrays.stream(canBeRetransformedClasses).collect(Collectors.toSet());
         RemoteService remoteService = startServer(port, classSet, inst);
 
-        System.out.println("pid is : " + RuntimeMXBeanUtil.getPid());
+        logger.info("Pid is " + RuntimeMXBeanUtil.getPid());
         DumpClassFileTransformer transformer = new DumpClassFileTransformer(RuntimeMXBeanUtil.getPid() + "", remoteService);
         inst.addTransformer(transformer, true);
 
@@ -80,9 +85,14 @@ public class PluginAgent {
         @Override
         public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
             if (classfileBuffer != null && className != null) {
-                String dir = AgentPkgPath.getPath().getParent() + "/dump";
-                String path = dir + File.separator + getPid() + File.separator + className + ".class";
-                System.out.println(className + "=>" + path);
+                String path;
+                try {
+                    String dir = AgentPkgPath.getPath().getParent() + "/dump";
+                    path = dir + File.separator + getPid() + File.separator + className + ".class";
+                } catch (AgentPkgNotFoundException e) {
+                    return classfileBuffer;
+                }
+
                 File tmpFile = new File(path);
                 try {
                     if (!tmpFile.exists()) {
@@ -96,14 +106,13 @@ public class PluginAgent {
                     FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
                     fileOutputStream.write(classfileBuffer);
                     fileOutputStream.flush();
-                    System.out.println("transform class " + className + " success!");
 
                     // 调用远程方法
                     if (this.remoteService != null) {
                         this.remoteService.setClassPath(className, path);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ignored) {
+
                 }
             }
             return classfileBuffer;
@@ -120,9 +129,9 @@ public class PluginAgent {
             // 导出远程对象并绑定到 RMI Registry
             registry = LocateRegistry.createRegistry(port);
             registry.rebind("RemoteService", remoteService);
-            System.out.println("RMI Server is running.");
+            logger.info("RMI Server is running.");
         } catch (Exception e) {
-            System.out.println("RMI Server is running error.");
+            logger.error("RMI Server is running error.");
         }
 
         if (remoteService == null) {
@@ -132,8 +141,8 @@ public class PluginAgent {
         if (registry != null) {
             try {
                 remoteService.setAllAvailableClasses(classes);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+            } catch (RemoteException ignored) {
+
             }
         }
         return remoteService;

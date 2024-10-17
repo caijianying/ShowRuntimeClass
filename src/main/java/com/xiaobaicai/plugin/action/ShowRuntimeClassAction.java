@@ -13,7 +13,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.MouseChecker;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.awt.RelativePoint;
@@ -44,12 +43,9 @@ public class ShowRuntimeClassAction extends AnAction {
         String targetClassName = "";
         if (virtualFile.getName().endsWith(".java")) {
             PsiFile file = PsiManager.getInstance(e.getProject()).findFile(virtualFile);
-            if (file instanceof PsiJavaFile) {
-                PsiJavaFile javaFile = (PsiJavaFile) file;
-                String packageName = javaFile.getPackageName();
-                System.out.println(packageName);
-                targetClassName = packageName + "." + javaFile.getName().replace(".java", "");
-            }
+            String code = file.getFileDocument().getText();
+            String packageName = FileScanner.INSTANCE.getPackageNameFromClassCode(code);
+            targetClassName = packageName + "." + file.getName().replace(".java", "");
         }
         Project project = e.getProject();
         List<MatchedVmModel> modelList = FileScanner.INSTANCE.compare(project);

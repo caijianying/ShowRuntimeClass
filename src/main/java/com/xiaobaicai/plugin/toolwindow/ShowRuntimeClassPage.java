@@ -107,9 +107,8 @@ public class ShowRuntimeClassPage {
         });
         JPanel treeJPanel = new JPanel(new BorderLayout());
 
-
         // 查找class输入框
-        classNamesCompletion = new TextFieldWithAutoCompletion(this.project, new TextFieldWithAutoCompletion.StringsCompletionProvider(fileScanner.getClassNames(), IconLoader.findIcon("./icons/show.svg")), true, null);
+        classNamesCompletion = new TextFieldWithAutoCompletion(this.project, new TextFieldWithAutoCompletion.StringsCompletionProvider(fileScanner.getClassNames(), IconLoader.findIcon("/icons/show.svg")), true, null);
         classNamesCompletion.addDocumentListener(new DocumentListener() {
             @Override
             public void beforeDocumentChange(@NotNull DocumentEvent event) {
@@ -134,7 +133,7 @@ public class ShowRuntimeClassPage {
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         ToolbarPanel refreshPanel = new ToolbarPanel(classNamesCompletion, actionGroup);
         refreshPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        refreshPanel.add(new JLabel(IconLoader.findIcon("./icons/show.svg")));
+        refreshPanel.add(new JLabel(IconLoader.findIcon("/icons/show.svg")));
         refreshPanel.add(classNamesCompletion);
 
         treeJPanel.add(refreshPanel, BorderLayout.NORTH);

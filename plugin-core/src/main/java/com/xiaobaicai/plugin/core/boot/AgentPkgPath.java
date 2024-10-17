@@ -30,8 +30,6 @@ public class AgentPkgPath {
         URL resource = ClassLoader.getSystemClassLoader().getResource(classResourcePath);
         if (resource != null) {
             String urlString = resource.toString();
-            System.out.println(String.format("The beacon class location is %s.",urlString));
-
             int insidePathIndex = urlString.indexOf('!');
             boolean isInJar = insidePathIndex > -1;
 
@@ -43,6 +41,7 @@ public class AgentPkgPath {
                 } catch (MalformedURLException | URISyntaxException e) {
                     System.err.println(String.format("Can not locate agent jar file by url: %s.",urlString));
                 }
+                assert agentJarFile != null;
                 if (agentJarFile.exists()) {
                     return agentJarFile.getParentFile();
                 }

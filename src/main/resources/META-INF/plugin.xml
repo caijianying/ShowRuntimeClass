@@ -19,6 +19,16 @@
     <vendor>小白菜</vendor>
 
     <change-notes><![CDATA[
+        <h3>V20241017</h3>
+        <ul>
+            <li>支持新版IDEA 2024版本</li>
+            <li>支持JDK17及以上版本</li>
+            <li>支持JAVA单体和多模块</li>
+            <li>fix <a href="https://github.com/caijianying/ShowRuntimeClass/issues/1">issue 1</a></li>
+            <li>增加了一个有逼格的banner</li>
+            <li>其他已知优化</li>
+        </ul>
+
         <h3>V20240711</h3>
         <ul>
             <li>优化attach时界面卡顿问题</li>
@@ -37,11 +47,11 @@
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.java</depends>
+    <!--    <depends>com.intellij.java</depends>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.xiaobaicai.plugin.toolwindow.ShowRuntimeClassToolWindow"
-                    icon="./icons/pluginIcon.svg"
+                    icon="/META-INF/pluginIcon.svg"
                     id="ShowRuntimeClass" anchor="right">
 
         </toolWindow>
@@ -50,8 +60,8 @@
     </extensions>
 
     <actions>
-        <action id="showRuntimeClassAction2" class="com.xiaobaicai.plugin.action.ShowRuntimeClassAction"
-                icon="./icons/view.svg"
+        <action id="showRuntimeClassAction" class="com.xiaobaicai.plugin.action.ShowRuntimeClassAction"
+                icon="/icons/view.svg"
                 description="view runtime class" text="view runtime class">
             <!-- 添加到鼠标右键菜单中 -->
             <add-to-group group-id="EditorContextBarMenu" anchor="first"/>

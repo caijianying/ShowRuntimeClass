@@ -1,14 +1,15 @@
 package com.xiaobaicai.plugin.scan;
 
 import com.google.common.collect.Lists;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import com.xiaobaicai.plugin.model.ClassInfoModel;
@@ -37,6 +38,7 @@ public class FileScanner {
 
     private List<String> classNames = Lists.newArrayList();
 
+    private List<String> checkMainClassKeywords = Lists.newArrayList("public", "static", "void", "main");
 
     public List<MatchedVmModel> compare(Project project) {
         // 扫描 mainClass
@@ -66,22 +68,51 @@ public class FileScanner {
         if (modules != null && modules.length == 1) {
             Module module = modules[0];
             String dirPath = ModuleUtil.getModuleDirPath(module);
-            if (dirPath != null) {
-                File file = new File(dirPath);
-                this.scanFile(file, psiManager, module);
-            }
+            File file = new File(dirPath);
+            this.scanModule(file.getParentFile(), psiManager, module);
         } else {
             for (Module module : modules) {
                 if (!module.getName().equals(project.getName())) {
                     String dirPath = ModuleUtil.getModuleDirPath(module);
-                    if (dirPath != null) {
-                        File file = new File(dirPath);
-                        this.scanFile(file, psiManager, module);
-                    }
+                    File file = new File(dirPath);
+                    this.scanModule(file, psiManager, module);
                 }
             }
         }
         return mainClasses;
+    }
+
+    private void scanModule(File rootProjectDir, PsiManager psiManager, Module module) {
+        if (rootProjectDir == null) {
+            return;
+        }
+        if (rootProjectDir.isDirectory()) {
+            File[] files = rootProjectDir.listFiles();
+            if (files == null || files.length == 0) {
+                return;
+            }
+            for (File file : files) {
+                if (file == null) {
+                    continue;
+                }
+                // 支持单体项目
+                if ("src".equals(file.getName())) {
+                    scanFile(file, psiManager, module);
+                }
+                // 支持maven多模块
+                if (module.getName().equals(file.getName())) {
+                    File[] childFiles = file.listFiles();
+                    if (childFiles == null) {
+                        continue;
+                    }
+                    for (File listFile : childFiles) {
+                        if ("src".equals(listFile.getName())) {
+                            scanFile(file, psiManager, module);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void scanFile(File file, PsiManager psiManager, Module module) {
@@ -91,75 +122,66 @@ public class FileScanner {
         if (!file.isDirectory()) {
             if (file.getName().endsWith(".java")) {
                 VirtualFile virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(file.getAbsolutePath());
-                PsiJavaFile javaFile = (PsiJavaFile) psiManager.findFile(virtualFile);
-                String className = javaFile.getPackageName() + "." + javaFile.getName().replace(".java", "");
-                ClassInfoModel infoModel = new ClassInfoModel();
-                infoModel.setClassName(className);
-                infoModel.setModuleName(module.getName());
-                if (hasMainMethod(javaFile)) {
-                    if (!classNames.contains(className)) {
-                        mainClasses.add(infoModel);
-                    }
-                    for (ClassInfoModel clazz : mainClasses) {
-                        if (clazz.getClassName().equals(className)) {
-                            clazz.setModuleName(module.getName());
+                if (virtualFile == null) {
+                    return;
+                }
+                PsiFile psiFile = psiManager.findFile(virtualFile);
+                if (psiFile == null) {
+                    return;
+                }
+                FileType fileType = psiFile.getFileType();
+                if (fileType.getName().equals("JAVA")) {
+                    String code = psiFile.getFileDocument().getText();
+                    String classSimpleName = psiFile.getName().substring(0, psiFile.getName().lastIndexOf("."));
+                    String packageName = getPackageNameFromClassCode(code);
+                    String className = packageName + "." + classSimpleName;
+                    ClassInfoModel infoModel = new ClassInfoModel();
+                    infoModel.setClassName(className);
+                    infoModel.setModuleName(module.getName());
+                    if (this.isMainClass(code)) {
+                        if (!classNames.contains(className)) {
+                            mainClasses.add(infoModel);
                         }
                     }
+                    classNames.add(className);
+                    allClasses.add(infoModel);
                 }
-                classNames.add(className);
-                allClasses.add(infoModel);
             }
             return;
         }
 
         File[] files = file.listFiles();
+        if (files == null) {
+            return;
+        }
         for (File targetFile : files) {
             scanFile(targetFile, psiManager, module);
         }
     }
 
-    /**
-     * 是否含有main方法
-     **/
-    private boolean hasMainMethod(PsiJavaFile javaFile) {
-        while (true) {
-            if (ProjectManager.getInstance().getDefaultProject().isInitialized()) {
-                break;
+    public String getPackageNameFromClassCode(String code) {
+
+        for (String line : code.split("\n")) {
+            if (line.startsWith("package")) {
+                return line.replace("package", "").replace(";", "").trim();
             }
         }
+        return null;
+    }
 
-        PsiClass[] classes = javaFile.getClasses();
-        for (PsiClass psiClass : classes) {
-            PsiMethod[] methods = psiClass.findMethodsByName("main", false);
-            for (PsiMethod method : methods) {
-                if (isMainMethod(method)) {
-                    return true;
+    public boolean isMainClass(String code) {
+        for (String line : code.split("\n")) {
+            boolean mainClassCheck = true;
+            for (String classKeyword : checkMainClassKeywords) {
+                if (!line.contains(classKeyword)) {
+                    mainClassCheck = false;
+                    break;
                 }
+            }
+            if (mainClassCheck) {
+                return true;
             }
         }
         return false;
     }
-
-    private boolean isMainMethod(PsiMethod method) {
-        if (!method.hasModifierProperty(PsiModifier.PUBLIC)) {
-            return false;
-        }
-        if (!method.hasModifierProperty(PsiModifier.STATIC)) {
-            return false;
-        }
-        if (!PsiType.VOID.equals(method.getReturnType())) {
-            return false;
-        }
-        PsiParameterList parameterList = method.getParameterList();
-        PsiParameter[] parameters = parameterList.getParameters();
-        if (parameters.length != 1) {
-            return false;
-        }
-        PsiType parameterType = parameters[0].getType();
-        if (!(parameterType instanceof PsiArrayType)) {
-            return false;
-        }
-        return "String[]".equals(parameterType.getPresentableText());
-    }
-
 }
