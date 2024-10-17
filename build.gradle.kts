@@ -8,7 +8,7 @@ apply(from = rootProject.file("config.gradle.kts"))
 val versions = extra["versions"] as Map<*, *>
 
 group = "com.xiaobaicai.plugin"
-version "${extra["projectVersion"]}"
+version = "${extra["projectVersion"]}"
 
 repositories {
     mavenCentral()

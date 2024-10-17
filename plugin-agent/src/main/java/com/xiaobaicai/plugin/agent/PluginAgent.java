@@ -22,6 +22,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -35,6 +37,8 @@ public class PluginAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginAgent.class);
 
+    private static final Map<Integer, RemoteService> REMOTE_SERVICE_PORT_MAP = new HashMap<>();
+
     public static void premain(String agentArgs, Instrumentation inst) {
 
     }
@@ -45,8 +49,13 @@ public class PluginAgent {
         Integer port = infoDTO.getPort();
         Class<?>[] canBeRetransformedClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(c -> inst.isModifiableClass(c) && !c.isArray()).toArray(Class[]::new);
         Set<Class> classSet = Arrays.stream(canBeRetransformedClasses).collect(Collectors.toSet());
-        RemoteService remoteService = startServer(port, classSet, inst);
+        RemoteService remoteService = REMOTE_SERVICE_PORT_MAP.get(port);
+        if (remoteService == null) {
+            remoteService = startServer(port, classSet, inst);
+            REMOTE_SERVICE_PORT_MAP.put(port, remoteService);
+        }
 
+        logger.info("Received pid is " + infoDTO.getPid());
         logger.info("Pid is " + RuntimeMXBeanUtil.getPid());
         DumpClassFileTransformer transformer = new DumpClassFileTransformer(RuntimeMXBeanUtil.getPid() + "", remoteService);
         inst.addTransformer(transformer, true);
@@ -54,13 +63,13 @@ public class PluginAgent {
         // 添加到启动类加载器，为了让所有classloader能加载到agent包中的类
         String clazzName = PluginAgent.class.getName().replace(".", "/") + ".class";
         URL resource = ClassLoader.getSystemClassLoader().getResource(clazzName);
-        if (resource.getProtocol().equals("jar")) {
+        if (resource != null && ("jar").equals(resource.getProtocol())) {
             int index = resource.getPath().indexOf("!/");
             if (index > -1) {
                 String jarFile = resource.getPath().substring("file:".length(), index);
                 try {
                     inst.appendToBootstrapClassLoaderSearch(new JarFile(new File(jarFile)));
-                } catch (IOException e) {
+                } catch (IOException ignored) {
 
                 }
             }
