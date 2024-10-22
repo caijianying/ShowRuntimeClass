@@ -15,7 +15,7 @@ import java.awt.*;
  */
 public class ToolbarPanel extends JPanel {
     public ToolbarPanel(JComponent contentComponent, ActionGroup actions) {
-        this(contentComponent, actions, "unknown");
+        this(contentComponent, actions, "ShowRuntimeClass.toolbar");
     }
 
     public ToolbarPanel(JComponent contentComponent, ActionGroup actions, String toolbarPlace) {
@@ -24,8 +24,8 @@ public class ToolbarPanel extends JPanel {
         if (contentComponent.getBorder() != null) {
             contentComponent.setBorder(BorderFactory.createEmptyBorder());
         }
-
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(toolbarPlace, actions, true);
+        actionToolbar.setTargetComponent(contentComponent);
         this.add(actionToolbar.getComponent(), new GridBagConstraints(0, -1, 1, 1, 1.0D, 0.0D, 17, 2, JBUI.emptyInsets(), 0, 0));
         this.add(contentComponent, new GridBagConstraints(0, -1, 1, 1, 1.0D, 1.0D, 17, 1, JBUI.emptyInsets(), 0, 0));
     }

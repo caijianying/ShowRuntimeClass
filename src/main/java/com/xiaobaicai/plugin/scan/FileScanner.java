@@ -42,7 +42,9 @@ public class FileScanner {
 
     public List<MatchedVmModel> compare(Project project) {
         // 扫描 mainClass
-        List<ClassInfoModel> mainClasses = scan(project);
+        if (mainClasses == null) {
+            mainClasses = scan(project);
+        }
         // 查找进程
         List<VirtualMachineDescriptor> list = VirtualMachine.list();
         // 匹配

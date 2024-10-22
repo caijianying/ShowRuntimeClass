@@ -6,12 +6,12 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.GotItMessage;
+import com.intellij.ui.GotItTooltip;
 import com.intellij.ui.TextFieldWithAutoCompletion;
-import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.xiaobaicai.plugin.core.dto.AttachVmInfoDTO;
@@ -21,12 +21,12 @@ import com.xiaobaicai.plugin.core.utils.RemoteUtil;
 import com.xiaobaicai.plugin.model.MatchedVmReturnModel;
 import com.xiaobaicai.plugin.utils.PluginUtils;
 import com.xiaobaicai.plugin.utils.ProjectCache;
+import kotlin.Unit;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.rmi.RemoteException;
 import java.util.Set;
 
 /**
@@ -69,20 +69,27 @@ public class ShowRuntimeClassToolWindow implements ToolWindowFactory {
         toolWindow.getContentManager().addContent(content);
 
 
-        String step1Message="1. 输入当前项目下的启动类，插件会自动为你匹配到运行的进程！";
-        String step2Message="2. 查找该进程中运行时的class";
+        String step1Message = "1. 输入当前项目下的启动类，插件会自动为你匹配到运行的进程！";
+        String step2Message = "2. 查找该进程中运行时的class";
         Icon usageIcon = IconLoader.findIcon("/icons/usage.svg");
         TextFieldWithAutoCompletion mainClassAutoCompletion = page.mainClassAutoCompletion;
         TextFieldWithAutoCompletion classNamesCompletion = page.classNamesCompletion;
         AnAction usageAction = new AnAction(usageIcon) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                GotItMessage.createMessage("新手引导", step1Message)
-                        .setCallback(()->{
-                            GotItMessage.createMessage("新手引导", step2Message)
-                                    .show(new RelativePoint(classNamesCompletion, new Point(0, classNamesCompletion.getHeight() / 2)), Balloon.Position.atLeft);
+                new GotItTooltip("got.it.id", step1Message, Disposer.newDisposable())
+                        .withHeader("新手引导")
+                        .withShowCount(Integer.MAX_VALUE)
+                        .withPosition(Balloon.Position.atLeft)
+                        .withGotItButtonAction(() -> {
+                            new GotItTooltip("got.it.id", step2Message, Disposer.newDisposable())
+                                    .withHeader("新手引导")
+                                    .withPosition(Balloon.Position.atLeft)
+                                    .withShowCount(Integer.MAX_VALUE)
+                                    .show(classNamesCompletion, (component, balloon) -> new Point(0, classNamesCompletion.getHeight() / 2));
+                            return Unit.INSTANCE;
                         })
-                        .show(new RelativePoint(mainClassAutoCompletion, new Point(0, mainClassAutoCompletion.getHeight() / 2)), Balloon.Position.atLeft);
+                        .show(mainClassAutoCompletion, (component, balloon) -> new Point(0, mainClassAutoCompletion.getHeight() / 2));
             }
         };
         usageAction.getTemplatePresentation().setText("Usage");
