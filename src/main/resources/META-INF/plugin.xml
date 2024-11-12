@@ -20,11 +20,38 @@
     <vendor>小白菜</vendor>
 
     <change-notes><![CDATA[
+        <h3>V20241112</h3>
+        <ul>
+            <li>fix: Resolved the issue where the startup class was occasionally not detected during scanning</li>
+        </ul>
+
+        <h3>V20241112</h3>
+        <ul>
+            <li>fix: 解决偶尔扫描不到启动类的问题</li>
+        </ul>
+
+        <h3>V20241022</h3>
+        <ul>
+            <li>Optimized project scanning performance</li>
+            <li>Improved user onboarding interface</li>
+        </ul>
+
         <h3>V20241022</h3>
         <ul>
             <li>优化了项目扫描性能</li>
             <li>新手引导界面优化</li>
         </ul>
+
+        <h3>V20241017</h3>
+        <ul>
+            <li>Added support for IDEA 2024 version</li>
+            <li>Supports JDK 17 and above</li>
+            <li>Supports both single and multi-module Java projects</li>
+            <li>fix <a href="https://github.com/caijianying/ShowRuntimeClass/issues/1">issue 1</a></li>
+            <li>Added a stylish banner</li>
+            <li>Other known optimizations</li>
+        </ul>
+
 
         <h3>V20241017</h3>
         <ul>
@@ -38,7 +65,19 @@
 
         <h3>V20240711</h3>
         <ul>
+            <li>Optimized UI lag issue during attachment</li>
+        </ul>
+
+        <h3>V20240711</h3>
+        <ul>
             <li>优化attach时界面卡顿问题</li>
+        </ul>
+
+        <h3>V20240710</h3>
+        <ul>
+            <li>UI Interface</li>
+            <li>Bytecode enhancement</li>
+            <li>RPC call communication</li>
         </ul>
 
         <h3>V20240710</h3>
