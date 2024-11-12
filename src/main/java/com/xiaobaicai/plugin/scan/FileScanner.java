@@ -1,5 +1,6 @@
 package com.xiaobaicai.plugin.scan;
 
+import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
@@ -40,10 +41,11 @@ public class FileScanner {
 
     private List<String> checkMainClassKeywords = Lists.newArrayList("public", "static", "void", "main");
 
-    public List<MatchedVmModel> compare(Project project) {
+    public synchronized List<MatchedVmModel> compare(Project project) {
         // 扫描 mainClass
-        if (mainClasses == null) {
+        if (mainClasses.isEmpty()) {
             mainClasses = scan(project);
+            System.out.println("compare.mainClasses: " + JSONUtil.toJsonStr(mainClasses));
         }
         // 查找进程
         List<VirtualMachineDescriptor> list = VirtualMachine.list();
